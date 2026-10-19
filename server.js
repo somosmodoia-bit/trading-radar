@@ -46,16 +46,16 @@ setInterval(() => {
   });
 }, 12000);
 
-// Configuración de Detección Equilibrada para Demo Institucional
+// Configuración de Detección Calibrada (> 8 BTC con anti-ruido)
 let binanceWs;
-const SPOOF_THRESHOLD_BTC = 8.0;        // Umbral óptimo: 8 BTC (~$650.000 USD)
-const MIN_SPOOF_DURATION_SEC = 0.8;     // Descartar parpadeos de red menores a 800ms
+const SPOOF_THRESHOLD_BTC = 8.0;        // Umbral exacto: 8 BTC (~$650.000 USD)
+const MIN_SPOOF_DURATION_SEC = 0.8;     // Ignorar parpadeos menores a 800ms
 const MAX_SPOOF_DURATION_SEC = 4.2;     // Ventana táctica de spoofing
 const orderHistory = new Map();
-const alertCooldowns = new Map();       // Evita spam del mismo nivel
+const alertCooldowns = new Map();       // Cooldown por nivel de precio
 
 const SERVER_START_TIME = Date.now();
-const WARMUP_MS = 10000;                // 10s de espera inicial al arrancar
+const WARMUP_MS = 10000;
 
 function connectBinance() {
   try {
@@ -77,7 +77,7 @@ function connectBinance() {
         const now = Date.now();
         const currentActiveKeys = new Set();
 
-        // Rastreamos los primeros 10 niveles del libro
+        // Rastreo en el núcleo del libro (primeros 10 niveles)
         const coreBids = bids.slice(0, 10);
         const coreAsks = asks.slice(0, 10);
 
@@ -101,20 +101,19 @@ function connectBinance() {
           }
         });
 
-        // Evaluación algorítmica de cancelaciones institucionales
+        // Evaluación de cancelaciones reales
         if (now - SERVER_START_TIME > WARMUP_MS) {
           for (const [key, record] of orderHistory.entries()) {
             if (!currentActiveKeys.has(key)) {
               const duration = (now - record.firstSeen) / 1000;
               const lastAlerted = alertCooldowns.get(key) || 0;
 
-              // Condición: > 8 BTC, entre 0.8s y 4.2s de vida, y sin alerta reciente en ese precio (30s cooldown)
               if (record.qty >= SPOOF_THRESHOLD_BTC && 
                   duration >= MIN_SPOOF_DURATION_SEC && 
                   duration <= MAX_SPOOF_DURATION_SEC &&
                   (now - lastAlerted > 30000)) {
 
-                // Verificar que no haya sido ejecutada por el mercado
+                // Descartar órdenes ejecutadas por el mercado
                 const wasExecuted = (record.side === 'ask' && record.price <= bestBid) ||
                                     (record.side === 'bid' && record.price >= bestAsk);
 
