@@ -46,7 +46,7 @@
       </div>
 
       <div class="flex items-center gap-3">
-        <span class="text-gray-400">PRECIO ÍNDICE:</span>
+        <span class="text-gray-400" data-i18n="indexPrice">PRECIO ÍNDICE:</span>
         <span id="midPrice" class="font-bold text-white text-base tabular-nums">$ --</span>
         <span id="spreadBadge" class="text-[10px] px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[#00f2fe]">SPREAD: --</span>
       </div>
@@ -55,10 +55,17 @@
     <div class="flex items-center gap-4 text-[11px]">
       <div class="flex items-center gap-2">
         <span class="w-2 h-2 rounded-full bg-[#00ff88] animate-ping"></span>
-        <span class="text-white font-medium">L2 STREAM ONLINE</span>
+        <span class="text-white font-medium" data-i18n="streamOnline">L2 STREAM ONLINE</span>
       </div>
       <div class="border-l border-white/10 pl-3 text-gray-400">
         ALGO: <span class="text-[#00f2fe] font-bold">ANTI_SPOOF_v1</span>
+      </div>
+
+      <!-- SELECTOR MANUAL DE IDIOMA -->
+      <div class="border-l border-white/10 pl-3 flex items-center gap-1 font-bold">
+        <button id="btnLangES" onclick="setLanguage('es')" class="px-1.5 py-0.5 rounded bg-[#00ff88]/20 text-[#00ff88]">ES</button>
+        <span class="text-gray-600">/</span>
+        <button id="btnLangEN" onclick="setLanguage('en')" class="px-1.5 py-0.5 rounded hover:bg-white/5 text-gray-400">EN</button>
       </div>
     </div>
   </header>
@@ -69,8 +76,8 @@
     <!-- COLUMNA 1: ORDER BOOK EN VIVO (4 COLS) -->
     <section class="col-span-4 panel-box rounded flex flex-col overflow-hidden">
       <div class="h-8 border-b border-white/10 px-3 flex items-center justify-between bg-white/[0.02]">
-        <span class="font-bold text-white text-[11px] tracking-wide">PROFUNDIDAD DE MERCADO (L2)</span>
-        <span class="text-[10px] text-gray-400">TAMAÑO (BTC)</span>
+        <span class="font-bold text-white text-[11px] tracking-wide" data-i18n="depthTitle">PROFUNDIDAD DE MERCADO (L2)</span>
+        <span class="text-[10px] text-gray-400" data-i18n="sizeBtc">TAMAÑO (BTC)</span>
       </div>
 
       <!-- ASKS (Venta) -->
@@ -80,7 +87,7 @@
 
       <!-- MID SPREAD BAR -->
       <div class="h-7 bg-white/[0.02] border-y border-white/10 px-3 flex items-center justify-between text-[11px]">
-        <span class="text-gray-400">ÚLTIMO MID</span>
+        <span class="text-gray-400" data-i18n="lastMid">ÚLTIMO MID</span>
         <span id="midCenter" class="text-white font-bold tabular-nums">--</span>
       </div>
 
@@ -95,28 +102,28 @@
       <div class="h-8 border-b border-white/10 px-3 flex items-center justify-between bg-white/[0.02]">
         <div class="flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-[#ff3366] animate-pulse"></span>
-          <span class="font-bold text-white text-[11px] tracking-wide">DETECCIÓN DE SPOOFING INSTITUCIONAL</span>
+          <span class="font-bold text-white text-[11px] tracking-wide" data-i18n="spoofTitle">DETECCIÓN DE SPOOFING INSTITUCIONAL</span>
         </div>
-        <span class="text-[10px] px-1.5 py-0.5 bg-[#ff3366]/20 text-[#ff3366] font-bold rounded">FILTRO &gt; 8 BTC</span>
+        <span class="text-[10px] px-1.5 py-0.5 bg-[#ff3366]/20 text-[#ff3366] font-bold rounded" data-i18n="filterBtc">FILTRO &gt; 8 BTC</span>
       </div>
 
       <div class="flex-1 overflow-y-auto p-2">
         <table class="w-full text-left">
           <thead>
             <tr class="text-[10px] text-gray-500 border-b border-white/10 pb-1">
-              <th class="py-1">HORA</th>
-              <th>TIPO</th>
-              <th>PRECIO</th>
-              <th>VOL BTC</th>
-              <th>DURACIÓN</th>
-              <th>NIVEL</th>
+              <th class="py-1" data-i18n="thTime">HORA</th>
+              <th data-i18n="thType">TIPO</th>
+              <th data-i18n="thPrice">PRECIO</th>
+              <th data-i18n="thVol">VOL BTC</th>
+              <th data-i18n="thDuration">DURACIÓN</th>
+              <th data-i18n="thLevel">NIVEL</th>
             </tr>
           </thead>
           <tbody id="alertsBody" class="divide-y divide-white/[0.04] tabular-nums">
             <!-- Inyectado por JS -->
           </tbody>
         </table>
-        <div id="noAlerts" class="h-40 flex items-center justify-center text-gray-500 text-xs">
+        <div id="noAlerts" class="h-40 flex items-center justify-center text-gray-500 text-xs" data-i18n="scanningText">
           Escaneando cancelaciones institucionales en microsegundos...
         </div>
       </div>
@@ -125,7 +132,7 @@
     <!-- COLUMNA 3: FEED DE NOTICIAS DE IMPACTO & CORRELACIÓN (3 COLS) -->
     <section class="col-span-3 panel-box rounded flex flex-col overflow-hidden">
       <div class="h-8 border-b border-white/10 px-3 flex items-center justify-between bg-white/[0.02]">
-        <span class="font-bold text-white text-[11px] tracking-wide">NOTICIAS DE IMPACTO RÁPIDO</span>
+        <span class="font-bold text-white text-[11px] tracking-wide" data-i18n="newsTitle">NOTICIAS DE IMPACTO RÁPIDO</span>
         <span class="text-[10px] text-[#00f2fe] font-bold">LIVE WIRE</span>
       </div>
 
@@ -137,6 +144,88 @@
   </main>
 
   <script>
+    // ─────────────────────────────────────────────────────────────
+    // DICCIONARIOS DE INTERNACIONALIZACIÓN (i18n)
+    // ─────────────────────────────────────────────────────────────
+    const I18N = {
+      es: {
+        indexPrice: 'PRECIO ÍNDICE:',
+        streamOnline: 'L2 STREAM ONLINE',
+        depthTitle: 'PROFUNDIDAD DE MERCADO (L2)',
+        sizeBtc: 'TAMAÑO (BTC)',
+        lastMid: 'ÚLTIMO MID',
+        spoofTitle: 'DETECCIÓN DE SPOOFING INSTITUCIONAL',
+        filterBtc: 'FILTRO > 8 BTC',
+        thTime: 'HORA',
+        thType: 'TIPO',
+        thPrice: 'PRECIO',
+        thVol: 'VOL BTC',
+        thDuration: 'DURACIÓN',
+        thLevel: 'NIVEL',
+        scanningText: 'Escaneando cancelaciones institucionales en microsegundos...',
+        newsTitle: 'NOTICIAS DE IMPACTO RÁPIDO',
+        spreadLabel: 'SPREAD:',
+        criticalLevel: 'CRÍTICO',
+        highLevel: 'ALTO',
+        spoofBid: 'SPOOFING COMPRA (Fake Wall)',
+        spoofAsk: 'SPOOFING VENTA (Fake Wall)'
+      },
+      en: {
+        indexPrice: 'INDEX PRICE:',
+        streamOnline: 'L2 STREAM ONLINE',
+        depthTitle: 'MARKET DEPTH (L2)',
+        sizeBtc: 'SIZE (BTC)',
+        lastMid: 'LAST MID',
+        spoofTitle: 'INSTITUTIONAL SPOOFING RADAR',
+        filterBtc: 'FILTER > 8 BTC',
+        thTime: 'TIME',
+        thType: 'TYPE',
+        thPrice: 'PRICE',
+        thVol: 'VOL BTC',
+        thDuration: 'DURATION',
+        thLevel: 'LEVEL',
+        scanningText: 'Scanning institutional cancellations at microsecond speed...',
+        newsTitle: 'BREAKING IMPACT NEWS',
+        spreadLabel: 'SPREAD:',
+        criticalLevel: 'CRITICAL',
+        highLevel: 'HIGH',
+        spoofBid: 'BID SPOOFING (Fake Wall)',
+        spoofAsk: 'ASK SPOOFING (Fake Wall)'
+      }
+    };
+
+    // Detección automática por idioma de navegador/dispositivo
+    let userLocale = (navigator.languages && navigator.languages[0]) || navigator.language || 'en';
+    let currentLang = userLocale.toLowerCase().startsWith('es') ? 'es' : 'en';
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      const dict = I18N[lang];
+
+      // Reemplazo de textos de interfaz
+      document.querySelectorAll('[data-i18n]').forEach((el) => {
+        const key = el.getAttribute('data-i18n');
+        if (dict[key]) el.textContent = dict[key];
+      });
+
+      // Actualización de botones de lenguaje
+      const btnES = document.getElementById('btnLangES');
+      const btnEN = document.getElementById('btnLangEN');
+      if (lang === 'es') {
+        btnES.className = 'px-1.5 py-0.5 rounded bg-[#00ff88]/20 text-[#00ff88]';
+        btnEN.className = 'px-1.5 py-0.5 rounded hover:bg-white/5 text-gray-400';
+      } else {
+        btnEN.className = 'px-1.5 py-0.5 rounded bg-[#00f2fe]/20 text-[#00f2fe]';
+        btnES.className = 'px-1.5 py-0.5 rounded hover:bg-white/5 text-gray-400';
+      }
+    }
+
+    // Inicializar traducción
+    setLanguage(currentLang);
+
+    // ─────────────────────────────────────────────────────────────
+    // COMUNICACIÓN WEBSOCKET & RENDERIZADO
+    // ─────────────────────────────────────────────────────────────
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const ws = new WebSocket(`${protocol}//${window.location.host}`);
 
@@ -155,7 +244,7 @@
       if (data.type === 'ORDER_BOOK_UPDATE') {
         midPriceEl.textContent = `$ ${data.midPrice}`;
         midCenterEl.textContent = `$ ${data.midPrice}`;
-        spreadBadge.textContent = `SPREAD: $ ${data.spread}`;
+        spreadBadge.textContent = `${I18N[currentLang].spreadLabel} $ ${data.spread}`;
 
         // Render Asks
         let asksHTML = '';
@@ -192,15 +281,25 @@
         noAlerts.style.display = 'none';
         const a = data.alerta;
         const color = a.side === 'bid' ? 'text-[#00ff88]' : 'text-[#ff3366]';
+        
+        // Tipo traducido
+        const translatedType = a.side === 'bid' 
+          ? I18N[currentLang].spoofBid 
+          : I18N[currentLang].spoofAsk;
+
+        const translatedLevel = a.severidad === 'CRÍTICO' 
+          ? I18N[currentLang].criticalLevel 
+          : I18N[currentLang].highLevel;
+
         const row = document.createElement('tr');
         row.className = 'hover:bg-white/[0.02] text-[11px]';
         row.innerHTML = `
           <td class="py-1.5 text-gray-400">${a.timestamp}</td>
-          <td class="font-bold ${color}">${a.tipo}</td>
+          <td class="font-bold ${color}">${translatedType}</td>
           <td class="text-white">${a.price}</td>
           <td class="font-bold text-white">${a.volumenBTC} <span class="text-[9px] text-gray-500 font-normal">(${a.volumenUSD})</span></td>
           <td class="text-gray-300">${a.duracionSeg}s</td>
-          <td><span class="px-1.5 py-0.2 rounded text-[9px] font-bold ${a.severidad === 'CRÍTICO' ? 'bg-[#ff3366]/20 text-[#ff3366]' : 'bg-yellow-500/20 text-yellow-400'}">${a.severidad}</span></td>
+          <td><span class="px-1.5 py-0.2 rounded text-[9px] font-bold ${a.severidad === 'CRÍTICO' ? 'bg-[#ff3366]/20 text-[#ff3366]' : 'bg-yellow-500/20 text-yellow-400'}">${translatedLevel}</span></td>
         `;
         alertsBody.prepend(row);
       }
