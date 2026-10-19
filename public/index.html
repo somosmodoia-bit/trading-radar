@@ -148,7 +148,7 @@
       </div>
     </section>
 
-    <!-- COLUMNA 2: DETECCIÓN DE SPOOFING (TABLA ALINEADA EN DESKTOP / CARDS EN MOBILE) -->
+    <!-- COLUMNA 2: DETECCIÓN DE SPOOFING -->
     <section id="panelSpoof" class="hidden md:flex col-span-1 md:col-span-5 panel-box rounded flex-col h-[520px] md:h-full overflow-hidden">
       <div class="h-8 border-b border-white/10 px-3 flex items-center justify-between gap-2 bg-white/[0.02] shrink-0">
         <div class="flex items-center gap-2 min-w-0">
@@ -199,7 +199,7 @@
   <footer class="border-t border-white/10 bg-[#06080c] px-3 md:px-4 py-1.5 md:h-7 flex flex-col sm:flex-row items-center justify-between gap-1 text-[10px] text-gray-400 font-mono shrink-0">
     <div class="flex items-center gap-2">
       <span class="w-1.5 h-1.5 rounded-full bg-[#00ff88]"></span>
-      <span>NEXUS RADAR v1.0.7</span>
+      <span>NEXUS RADAR v1.0.8</span>
       <span class="text-gray-600 hidden sm:inline">|</span>
       <span class="hidden sm:inline" data-i18n="footerTagline">Inteligencia Cuantitativa &amp; Microestructura L2</span>
     </div>
@@ -452,11 +452,25 @@
     function setLanguage(lang) {
       currentLang = lang;
       const dict = I18N[lang];
+
+      // 1. Traducir elementos estáticos
       document.querySelectorAll('[data-i18n]').forEach((el) => {
         const key = el.getAttribute('data-i18n');
         if (dict[key]) el.textContent = dict[key];
       });
 
+      // 2. Actualizar etiquetas de alertas ya renderizadas en el DOM
+      document.querySelectorAll('[data-side]').forEach((el) => {
+        const side = el.getAttribute('data-side');
+        el.textContent = side === 'bid' ? dict.spoofBid : dict.spoofAsk;
+      });
+
+      document.querySelectorAll('[data-severity]').forEach((el) => {
+        const sev = el.getAttribute('data-severity');
+        el.textContent = sev === 'CRÍTICO' ? dict.criticalLevel : dict.highLevel;
+      });
+
+      // 3. Estilos de botones de idioma
       const btnES = document.getElementById('btnLangES');
       const btnEN = document.getElementById('btnLangEN');
       if (btnES && btnEN) {
@@ -469,8 +483,6 @@
         }
       }
     }
-
-    setLanguage(currentLang);
 
     const midPriceEl = document.getElementById('midPrice');
     const midCenterEl = document.getElementById('midCenter');
@@ -504,22 +516,23 @@
       const color = isBid ? 'text-[#00ff88]' : 'text-[#ff3366]';
       const bgBadge = isBid ? 'bg-[#00ff88]/10 border-[#00ff88]/30' : 'bg-[#ff3366]/10 border-[#ff3366]/30';
       const clientLocalTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-      const translatedType = isBid ? I18N[currentLang].spoofBid : I18N[currentLang].spoofAsk;
-      const translatedLevel = a.severidad === 'CRÍTICO' ? I18N[currentLang].criticalLevel : I18N[currentLang].highLevel;
+      const dict = I18N[currentLang];
+      const translatedType = isBid ? dict.spoofBid : dict.spoofAsk;
+      const translatedLevel = a.severidad === 'CRÍTICO' ? dict.criticalLevel : dict.highLevel;
 
       if (window.innerWidth < 768 && activeMobileTab !== 'spoof') {
         const bBadge = document.getElementById('mobileSpoofBadge');
         if (bBadge) bBadge.classList.remove('hidden');
       }
 
-      // 1. DESKTOP: Fila alineada
+      // 1. DESKTOP
       if (alertsDesktop) {
         const row = document.createElement('tr');
         row.className = 'hover:bg-white/[0.02]';
         row.innerHTML = `
           <td class="w-[18%] py-1.5 text-gray-400">${clientLocalTime}</td>
           <td class="w-[20%] font-bold ${color}">
-            <span class="px-1.5 py-0.5 rounded border ${bgBadge} text-[10px]">${translatedType}</span>
+            <span data-side="${a.side}" class="px-1.5 py-0.5 rounded border ${bgBadge} text-[10px]">${translatedType}</span>
           </td>
           <td class="w-[20%] text-white font-mono font-medium">${a.price}</td>
           <td class="w-[22%] text-white font-mono">
@@ -528,22 +541,22 @@
           </td>
           <td class="w-[10%] text-gray-400 font-mono">${a.duracionSeg}s</td>
           <td class="w-[10%] text-right">
-            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold ${a.severidad === 'CRÍTICO' ? 'bg-[#ff3366]/20 text-[#ff3366]' : 'bg-yellow-500/20 text-yellow-400'}">${translatedLevel}</span>
+            <span data-severity="${a.severidad}" class="px-1.5 py-0.5 rounded text-[9px] font-bold ${a.severidad === 'CRÍTICO' ? 'bg-[#ff3366]/20 text-[#ff3366]' : 'bg-yellow-500/20 text-yellow-400'}">${translatedLevel}</span>
           </td>
         `;
         alertsDesktop.prepend(row);
       }
 
-      // 2. MOBILE: Card limpia
+      // 2. MOBILE
       if (alertsMobile) {
         const card = document.createElement('div');
         card.className = 'p-2 rounded bg-white/[0.02] border border-white/5 flex flex-col gap-1.5';
         card.innerHTML = `
           <div class="flex items-center justify-between text-[10px]">
-            <span class="px-1.5 py-0.5 rounded border font-bold ${bgBadge} ${color}">${translatedType}</span>
+            <span data-side="${a.side}" class="px-1.5 py-0.5 rounded border font-bold ${bgBadge} ${color}">${translatedType}</span>
             <div class="flex items-center gap-1.5 text-gray-400">
               <span>${clientLocalTime}</span>
-              <span class="px-1 py-0.2 rounded text-[9px] font-bold ${a.severidad === 'CRÍTICO' ? 'bg-[#ff3366]/20 text-[#ff3366]' : 'bg-yellow-500/20 text-yellow-400'}">${translatedLevel}</span>
+              <span data-severity="${a.severidad}" class="px-1 py-0.2 rounded text-[9px] font-bold ${a.severidad === 'CRÍTICO' ? 'bg-[#ff3366]/20 text-[#ff3366]' : 'bg-yellow-500/20 text-yellow-400'}">${translatedLevel}</span>
             </div>
           </div>
           <div class="flex items-center justify-between text-[11px] font-mono">
@@ -580,7 +593,7 @@
 
             if (window.innerWidth < 768 && activeMobileTab !== 'orderbook') return;
 
-            // Asks (Venta)
+            // Asks
             if (asksContainer && data.asks) {
               let asksHTML = '';
               const maxAskQty = Math.max(...data.asks.map(a => a[1]), 1);
@@ -597,7 +610,7 @@
               asksContainer.innerHTML = asksHTML;
             }
 
-            // Bids (Compra)
+            // Bids
             if (bidsContainer && data.bids) {
               let bidsHTML = '';
               const maxBidQty = Math.max(...data.bids.map(b => b[1]), 1);
@@ -631,6 +644,7 @@
       ws.onerror = () => { try { ws.close(); } catch(e) {} };
     }
 
+    setLanguage(currentLang);
     connectWS();
   </script>
 </body>
