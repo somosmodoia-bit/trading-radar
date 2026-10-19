@@ -33,7 +33,7 @@
 </head>
 <body class="min-h-screen md:h-screen flex flex-col overflow-x-hidden md:overflow-hidden text-[12px] select-none">
 
-  <!-- TOP BAR 1: HEADER PRINCIPAL -->
+  <!-- TOP BAR 1: HEADER -->
   <header class="border-b border-white/10 bg-[#090d14] px-3 md:px-4 py-2 md:py-0 md:h-11 flex flex-col md:flex-row md:items-center justify-between gap-2 shrink-0">
     <div class="flex items-center justify-between md:justify-start gap-2.5 md:gap-5 flex-wrap">
       <div class="flex items-center gap-2">
@@ -71,7 +71,7 @@
     </div>
   </header>
 
-  <!-- TOP BAR 2: MONITOR DE BOLSAS MUNDIALES -->
+  <!-- TOP BAR 2: SESIONES -->
   <div class="border-b border-white/10 bg-[#06080c] px-3 md:px-4 py-1.5 md:h-8 flex items-center justify-between overflow-x-auto no-scrollbar text-[10px] font-mono shrink-0">
     <div class="flex items-center gap-4 md:gap-6 whitespace-nowrap min-w-max">
       <span class="text-gray-500 font-bold uppercase tracking-wider" data-i18n="marketSessions">SESIONES:</span>
@@ -110,7 +110,7 @@
     </div>
   </div>
 
-  <!-- SELECTOR DE PESTAÑAS MOBILE -->
+  <!-- SELECTOR DE TABS MOBILE -->
   <nav class="flex md:hidden bg-[#090d14] border-b border-white/10 text-xs shrink-0 font-medium">
     <button id="tabBtnOrderbook" onclick="switchMobileTab('orderbook')" class="flex-1 py-2 text-center text-[#00ff88] border-b-2 border-[#00ff88] bg-white/[0.02]" data-i18n="tabDepth">
       LIBRO L2
@@ -148,38 +148,42 @@
       </div>
     </section>
 
-    <!-- COLUMNA 2: DETECTOR DE SPOOFING (BOTÓN EN 1 LÍNEA GARANTIZADO) -->
+    <!-- COLUMNA 2: DETECCIÓN DE SPOOFING (TABLA ALINEADA EN DESKTOP / CARDS EN MOBILE) -->
     <section id="panelSpoof" class="hidden md:flex col-span-1 md:col-span-5 panel-box rounded flex-col h-[520px] md:h-full overflow-hidden">
-      <div class="h-9 md:h-8 border-b border-white/10 px-2.5 md:px-3 flex items-center justify-between gap-2 bg-white/[0.02] shrink-0">
-        <div class="flex items-center gap-1.5 md:gap-2 min-w-0">
+      <div class="h-8 border-b border-white/10 px-3 flex items-center justify-between gap-2 bg-white/[0.02] shrink-0">
+        <div class="flex items-center gap-2 min-w-0">
           <span class="w-2 h-2 rounded-full bg-[#ff3366] animate-pulse shrink-0"></span>
-          <span class="font-bold text-white text-[10px] md:text-[11px] tracking-wide leading-tight" data-i18n="spoofTitle">DETECCIÓN DE SPOOFING INSTITUCIONAL</span>
+          <span class="font-bold text-white text-[11px] tracking-wide" data-i18n="spoofTitle">DETECCIÓN DE SPOOFING INSTITUCIONAL</span>
         </div>
-        <!-- Botón siempre en 1 sola línea -->
-        <span class="whitespace-nowrap shrink-0 text-[9px] md:text-[10px] px-2 py-0.5 bg-[#ff3366]/20 text-[#ff3366] font-bold rounded border border-[#ff3366]/30" data-i18n="filterBtc">FILTRO &gt; 8 BTC</span>
+        <span class="whitespace-nowrap shrink-0 text-[10px] px-2 py-0.5 bg-[#ff3366]/20 text-[#ff3366] font-bold rounded border border-[#ff3366]/30" data-i18n="filterBtc">FILTRO &gt; 20 BTC</span>
       </div>
 
       <div class="flex-1 overflow-y-auto p-2">
-        <table class="w-full text-left">
+        <!-- VISTA TABLA (DESKTOP) -->
+        <table class="hidden md:table w-full table-fixed text-left">
           <thead>
             <tr class="text-[10px] text-gray-500 border-b border-white/10 pb-1">
-              <th class="py-1" data-i18n="thTime">HORA (LOCAL)</th>
-              <th data-i18n="thType">TIPO</th>
-              <th data-i18n="thPrice">PRECIO</th>
-              <th data-i18n="thVol">VOL BTC</th>
-              <th data-i18n="thDuration">DURACIÓN</th>
-              <th data-i18n="thLevel">NIVEL</th>
+              <th class="w-[18%] py-1" data-i18n="thTime">HORA</th>
+              <th class="w-[20%]" data-i18n="thType">TIPO</th>
+              <th class="w-[20%]" data-i18n="thPrice">PRECIO</th>
+              <th class="w-[22%]" data-i18n="thVol">VOLUMEN</th>
+              <th class="w-[10%]" data-i18n="thDuration">DUR.</th>
+              <th class="w-[10%] text-right" data-i18n="thLevel">NIVEL</th>
             </tr>
           </thead>
-          <tbody id="alertsBody" class="divide-y divide-white/[0.04] tabular-nums text-[10px] md:text-[11px]"></tbody>
+          <tbody id="alertsBodyDesktop" class="divide-y divide-white/[0.04] tabular-nums text-[11px]"></tbody>
         </table>
-        <div id="noAlerts" class="h-40 flex items-center justify-center text-gray-500 text-xs text-center px-4" data-i18n="scanningText">
+
+        <!-- VISTA TARJETAS (MOBILE) -->
+        <div id="alertsBodyMobile" class="flex md:hidden flex-col gap-2"></div>
+
+        <div id="noAlerts" class="h-48 flex items-center justify-center text-gray-500 text-xs text-center px-4" data-i18n="scanningText">
           Escaneando cancelaciones institucionales en microsegundos...
         </div>
       </div>
     </section>
 
-    <!-- COLUMNA 3: FEED DE NOTICIAS RÁPIDAS -->
+    <!-- COLUMNA 3: NOTICIAS -->
     <section id="panelNews" class="hidden md:flex col-span-1 md:col-span-3 panel-box rounded flex-col h-[520px] md:h-full overflow-hidden">
       <div class="h-8 border-b border-white/10 px-3 flex items-center justify-between bg-white/[0.02] shrink-0">
         <span class="font-bold text-white text-[11px] tracking-wide" data-i18n="newsTitle">NOTICIAS DE IMPACTO RÁPIDO</span>
@@ -195,7 +199,7 @@
   <footer class="border-t border-white/10 bg-[#06080c] px-3 md:px-4 py-1.5 md:h-7 flex flex-col sm:flex-row items-center justify-between gap-1 text-[10px] text-gray-400 font-mono shrink-0">
     <div class="flex items-center gap-2">
       <span class="w-1.5 h-1.5 rounded-full bg-[#00ff88]"></span>
-      <span>NEXUS RADAR v1.0.6</span>
+      <span>NEXUS RADAR v1.0.7</span>
       <span class="text-gray-600 hidden sm:inline">|</span>
       <span class="hidden sm:inline" data-i18n="footerTagline">Inteligencia Cuantitativa &amp; Microestructura L2</span>
     </div>
@@ -221,7 +225,7 @@
         </div>
         <div>
           <span class="text-[#ff3366] font-bold" data-i18n="helpStep2Title">2. Radar de Spoofing (Columna Centro):</span>
-          <p class="text-gray-400 mt-0.5" data-i18n="helpStep2Desc">Detecta ballenas o algoritmos que colocan órdenes de más de 8 BTC y las cancelan antes de 4.5 segundos para inducir a error al mercado.</p>
+          <p class="text-gray-400 mt-0.5" data-i18n="helpStep2Desc">Detecta ballenas o algoritmos que colocan órdenes de más de 20 BTC y las cancelan antes de 4.2 segundos para inducir a error al mercado.</p>
         </div>
         <div>
           <span class="text-[#00f2fe] font-bold" data-i18n="helpStep3Title">3. Sesiones Bursátiles (Barra Superior):</span>
@@ -377,25 +381,25 @@
         sizeBtc: 'TAMAÑO (BTC)',
         lastMid: 'ÚLTIMO MID',
         spoofTitle: 'DETECCIÓN DE SPOOFING INSTITUCIONAL',
-        filterBtc: 'FILTRO > 8 BTC',
-        thTime: 'HORA (LOCAL)',
+        filterBtc: 'FILTRO > 20 BTC',
+        thTime: 'HORA',
         thType: 'TIPO',
         thPrice: 'PRECIO',
-        thVol: 'VOL BTC',
-        thDuration: 'DURACIÓN',
+        thVol: 'VOLUMEN',
+        thDuration: 'DUR.',
         thLevel: 'NIVEL',
         scanningText: 'Escaneando cancelaciones institucionales en microsegundos...',
         newsTitle: 'NOTICIAS DE IMPACTO RÁPIDO',
         spreadLabel: 'SPREAD:',
         criticalLevel: 'CRÍTICO',
         highLevel: 'ALTO',
-        spoofBid: 'SPOOF COMPRA (Pared Falsa)',
-        spoofAsk: 'SPOOF VENTA (Pared Falsa)',
+        spoofBid: 'COMPRA FALSA',
+        spoofAsk: 'VENTA FALSA',
         modalTitle: 'GUÍA RÁPIDA // CÓMO INTERPRETAR LA TERMINAL',
         helpStep1Title: '1. Profundidad de Mercado (Columna Izquierda):',
         helpStep1Desc: 'Órdenes vivas esperando en Binance Futures: verde para compras y rojo para ventas. Las barras representan volumen acumulado creciendo de izquierda a derecha.',
         helpStep2Title: '2. Radar de Spoofing (Columna Centro):',
-        helpStep2Desc: 'Detecta ballenas o algoritmos que colocan órdenes de más de 8 BTC y las cancelan antes de 4.5 segundos para inducir a error al mercado.',
+        helpStep2Desc: 'Detecta ballenas o algoritmos que colocan órdenes de más de 20 BTC y las cancelan antes de 4.2 segundos para inducir a error al mercado.',
         helpStep3Title: '3. Sesiones Bursátiles (Barra Superior):',
         helpStep3Desc: 'Muestra los horarios de Nueva York, Londres, Tokio y Sídney. Si figura en verde (OPEN) el mercado tradicional está abierto e inyectando liquidez fuerte.',
         modalCloseBtn: 'CERRAR',
@@ -412,25 +416,25 @@
         sizeBtc: 'SIZE (BTC)',
         lastMid: 'LAST MID',
         spoofTitle: 'INSTITUTIONAL SPOOFING RADAR',
-        filterBtc: 'FILTER > 8 BTC',
-        thTime: 'TIME (LOCAL)',
+        filterBtc: 'FILTER > 20 BTC',
+        thTime: 'TIME',
         thType: 'TYPE',
         thPrice: 'PRICE',
-        thVol: 'VOL BTC',
-        thDuration: 'DURATION',
+        thVol: 'VOLUME',
+        thDuration: 'DUR.',
         thLevel: 'LEVEL',
         scanningText: 'Scanning institutional cancellations at microsecond speed...',
         newsTitle: 'BREAKING IMPACT NEWS',
         spreadLabel: 'SPREAD:',
         criticalLevel: 'CRITICAL',
         highLevel: 'HIGH',
-        spoofBid: 'BID SPOOF (Fake Wall)',
-        spoofAsk: 'ASK SPOOF (Fake Wall)',
+        spoofBid: 'FAKE BID',
+        spoofAsk: 'FAKE ASK',
         modalTitle: 'QUICK START // HOW TO READ THE TERMINAL',
         helpStep1Title: '1. Market Depth (Left Column):',
         helpStep1Desc: 'Live orders resting on Binance Futures: green for bids and red for asks. Bars show cumulative volume growing from left to right.',
         helpStep2Title: '2. Spoofing Radar (Center Column):',
-        helpStep2Desc: 'Detects institutional entities or bots placing large orders (> 8 BTC) and cancelling within 4.5s to manipulate price action.',
+        helpStep2Desc: 'Detects institutional entities or bots placing large orders (> 20 BTC) and cancelling within 4.2s to manipulate price action.',
         helpStep3Title: '3. Trading Sessions (Top Bar):',
         helpStep3Desc: 'Displays opening hours for New York, London, Tokyo, and Sydney. When green (OPEN), key macro markets are active and driving liquidity.',
         modalCloseBtn: 'CLOSE',
@@ -473,7 +477,8 @@
     const spreadBadge = document.getElementById('spreadBadge');
     const asksContainer = document.getElementById('asksContainer');
     const bidsContainer = document.getElementById('bidsContainer');
-    const alertsBody = document.getElementById('alertsBody');
+    const alertsDesktop = document.getElementById('alertsBodyDesktop');
+    const alertsMobile = document.getElementById('alertsBodyMobile');
     const noAlerts = document.getElementById('noAlerts');
     const newsContainer = document.getElementById('newsContainer');
 
@@ -494,11 +499,12 @@
     }
 
     function appendAlertRow(a) {
-      if (!alertsBody) return;
       if (noAlerts) noAlerts.style.display = 'none';
-      const color = a.side === 'bid' ? 'text-[#00ff88]' : 'text-[#ff3366]';
+      const isBid = a.side === 'bid';
+      const color = isBid ? 'text-[#00ff88]' : 'text-[#ff3366]';
+      const bgBadge = isBid ? 'bg-[#00ff88]/10 border-[#00ff88]/30' : 'bg-[#ff3366]/10 border-[#ff3366]/30';
       const clientLocalTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-      const translatedType = a.side === 'bid' ? I18N[currentLang].spoofBid : I18N[currentLang].spoofAsk;
+      const translatedType = isBid ? I18N[currentLang].spoofBid : I18N[currentLang].spoofAsk;
       const translatedLevel = a.severidad === 'CRÍTICO' ? I18N[currentLang].criticalLevel : I18N[currentLang].highLevel;
 
       if (window.innerWidth < 768 && activeMobileTab !== 'spoof') {
@@ -506,17 +512,48 @@
         if (bBadge) bBadge.classList.remove('hidden');
       }
 
-      const row = document.createElement('tr');
-      row.className = 'hover:bg-white/[0.02] text-[10px] md:text-[11px]';
-      row.innerHTML = `
-        <td class="py-1.5 text-gray-400">${clientLocalTime}</td>
-        <td class="font-bold ${color}">${translatedType}</td>
-        <td class="text-white">${a.price}</td>
-        <td class="font-bold text-white">${a.volumenBTC} <span class="text-[9px] text-gray-500 font-normal">(${a.volumenUSD})</span></td>
-        <td class="text-gray-300">${a.duracionSeg}s</td>
-        <td><span class="px-1.5 py-0.2 rounded text-[9px] font-bold ${a.severidad === 'CRÍTICO' ? 'bg-[#ff3366]/20 text-[#ff3366]' : 'bg-yellow-500/20 text-yellow-400'}">${translatedLevel}</span></td>
-      `;
-      alertsBody.prepend(row);
+      // 1. DESKTOP: Fila alineada con anchos porcentuales fijos
+      if (alertsDesktop) {
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-white/[0.02]';
+        row.innerHTML = `
+          <td class="w-[18%] py-1.5 text-gray-400">${clientLocalTime}</td>
+          <td class="w-[20%] font-bold ${color}">
+            <span class="px-1.5 py-0.5 rounded border ${bgBadge} text-[10px]">${translatedType}</span>
+          </td>
+          <td class="w-[20%] text-white font-mono font-medium">${a.price}</td>
+          <td class="w-[22%] text-white font-mono">
+            <span class="font-bold">${a.volumenBTC} BTC</span>
+            <span class="block text-[9px] text-gray-500 font-normal leading-tight">${a.volumenUSD}</span>
+          </td>
+          <td class="w-[10%] text-gray-400 font-mono">${a.duracionSeg}s</td>
+          <td class="w-[10%] text-right">
+            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold ${a.severidad === 'CRÍTICO' ? 'bg-[#ff3366]/20 text-[#ff3366]' : 'bg-yellow-500/20 text-yellow-400'}">${translatedLevel}</span>
+          </td>
+        `;
+        alertsDesktop.prepend(row);
+      }
+
+      // 2. MOBILE: Card limpia sin encimarse
+      if (alertsMobile) {
+        const card = document.createElement('div');
+        card.className = 'p-2 rounded bg-white/[0.02] border border-white/5 flex flex-col gap-1.5';
+        card.innerHTML = `
+          <div class="flex items-center justify-between text-[10px]">
+            <span class="px-1.5 py-0.5 rounded border font-bold ${bgBadge} ${color}">${translatedType}</span>
+            <div class="flex items-center gap-1.5 text-gray-400">
+              <span>${clientLocalTime}</span>
+              <span class="px-1 py-0.2 rounded text-[9px] font-bold ${a.severidad === 'CRÍTICO' ? 'bg-[#ff3366]/20 text-[#ff3366]' : 'bg-yellow-500/20 text-yellow-400'}">${translatedLevel}</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between text-[11px] font-mono">
+            <span class="text-white font-bold">$ ${a.price}</span>
+            <span class="text-white">${a.volumenBTC} BTC <span class="text-gray-500 text-[10px]">(${a.volumenUSD})</span></span>
+            <span class="text-gray-400">${a.duracionSeg}s</span>
+          </div>
+        `;
+        alertsMobile.prepend(card);
+      }
     }
 
     function connectWS() {
@@ -541,10 +578,9 @@
             if (midCenterEl) midCenterEl.textContent = `$ ${data.midPrice}`;
             if (spreadBadge) spreadBadge.textContent = `${I18N[currentLang].spreadLabel} $ ${data.spread}`;
 
-            // En mobile, optimizar DOM si no está en la pestaña L2
             if (window.innerWidth < 768 && activeMobileTab !== 'orderbook') return;
 
-            // Asks (Venta)
+            // Asks
             if (asksContainer && data.asks) {
               let asksHTML = '';
               const maxAskQty = Math.max(...data.asks.map(a => a[1]), 1);
@@ -561,7 +597,7 @@
               asksContainer.innerHTML = asksHTML;
             }
 
-            // Bids (Compra)
+            // Bids
             if (bidsContainer && data.bids) {
               let bidsHTML = '';
               const maxBidQty = Math.max(...data.bids.map(b => b[1]), 1);
