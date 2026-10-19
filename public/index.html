@@ -155,7 +155,7 @@
           <span class="w-2 h-2 rounded-full bg-[#ff3366] animate-pulse shrink-0"></span>
           <span class="font-bold text-white text-[11px] tracking-wide" data-i18n="spoofTitle">DETECCIÓN DE SPOOFING INSTITUCIONAL</span>
         </div>
-        <span class="whitespace-nowrap shrink-0 text-[10px] px-2 py-0.5 bg-[#ff3366]/20 text-[#ff3366] font-bold rounded border border-[#ff3366]/30" data-i18n="filterBtc">FILTRO &gt; 20 BTC</span>
+        <span class="whitespace-nowrap shrink-0 text-[10px] px-2 py-0.5 bg-[#ff3366]/20 text-[#ff3366] font-bold rounded border border-[#ff3366]/30" data-i18n="filterBtc">FILTRO &gt; 8 BTC</span>
       </div>
 
       <div class="flex-1 overflow-y-auto p-2">
@@ -225,7 +225,7 @@
         </div>
         <div>
           <span class="text-[#ff3366] font-bold" data-i18n="helpStep2Title">2. Radar de Spoofing (Columna Centro):</span>
-          <p class="text-gray-400 mt-0.5" data-i18n="helpStep2Desc">Detecta ballenas o algoritmos que colocan órdenes de más de 20 BTC y las cancelan antes de 4.2 segundos para inducir a error al mercado.</p>
+          <p class="text-gray-400 mt-0.5" data-i18n="helpStep2Desc">Detecta ballenas o algoritmos que colocan órdenes de más de 8 BTC y las cancelan antes de 4.2 segundos para inducir a error al mercado.</p>
         </div>
         <div>
           <span class="text-[#00f2fe] font-bold" data-i18n="helpStep3Title">3. Sesiones Bursátiles (Barra Superior):</span>
@@ -381,7 +381,7 @@
         sizeBtc: 'TAMAÑO (BTC)',
         lastMid: 'ÚLTIMO MID',
         spoofTitle: 'DETECCIÓN DE SPOOFING INSTITUCIONAL',
-        filterBtc: 'FILTRO > 20 BTC',
+        filterBtc: 'FILTRO > 8 BTC',
         thTime: 'HORA',
         thType: 'TIPO',
         thPrice: 'PRECIO',
@@ -399,7 +399,7 @@
         helpStep1Title: '1. Profundidad de Mercado (Columna Izquierda):',
         helpStep1Desc: 'Órdenes vivas esperando en Binance Futures: verde para compras y rojo para ventas. Las barras representan volumen acumulado creciendo de izquierda a derecha.',
         helpStep2Title: '2. Radar de Spoofing (Columna Centro):',
-        helpStep2Desc: 'Detecta ballenas o algoritmos que colocan órdenes de más de 20 BTC y las cancelan antes de 4.2 segundos para inducir a error al mercado.',
+        helpStep2Desc: 'Detecta ballenas o algoritmos que colocan órdenes de más de 8 BTC y las cancelan antes de 4.2 segundos para inducir a error al mercado.',
         helpStep3Title: '3. Sesiones Bursátiles (Barra Superior):',
         helpStep3Desc: 'Muestra los horarios de Nueva York, Londres, Tokio y Sídney. Si figura en verde (OPEN) el mercado tradicional está abierto e inyectando liquidez fuerte.',
         modalCloseBtn: 'CERRAR',
@@ -416,7 +416,7 @@
         sizeBtc: 'SIZE (BTC)',
         lastMid: 'LAST MID',
         spoofTitle: 'INSTITUTIONAL SPOOFING RADAR',
-        filterBtc: 'FILTER > 20 BTC',
+        filterBtc: 'FILTER > 8 BTC',
         thTime: 'TIME',
         thType: 'TYPE',
         thPrice: 'PRICE',
@@ -434,7 +434,7 @@
         helpStep1Title: '1. Market Depth (Left Column):',
         helpStep1Desc: 'Live orders resting on Binance Futures: green for bids and red for asks. Bars show cumulative volume growing from left to right.',
         helpStep2Title: '2. Spoofing Radar (Center Column):',
-        helpStep2Desc: 'Detects institutional entities or bots placing large orders (> 20 BTC) and cancelling within 4.2s to manipulate price action.',
+        helpStep2Desc: 'Detects institutional entities or bots placing large orders (> 8 BTC) and cancelling within 4.2s to manipulate price action.',
         helpStep3Title: '3. Trading Sessions (Top Bar):',
         helpStep3Desc: 'Displays opening hours for New York, London, Tokyo, and Sydney. When green (OPEN), key macro markets are active and driving liquidity.',
         modalCloseBtn: 'CLOSE',
@@ -512,7 +512,7 @@
         if (bBadge) bBadge.classList.remove('hidden');
       }
 
-      // 1. DESKTOP: Fila alineada con anchos porcentuales fijos
+      // 1. DESKTOP: Fila alineada
       if (alertsDesktop) {
         const row = document.createElement('tr');
         row.className = 'hover:bg-white/[0.02]';
@@ -534,7 +534,7 @@
         alertsDesktop.prepend(row);
       }
 
-      // 2. MOBILE: Card limpia sin encimarse
+      // 2. MOBILE: Card limpia
       if (alertsMobile) {
         const card = document.createElement('div');
         card.className = 'p-2 rounded bg-white/[0.02] border border-white/5 flex flex-col gap-1.5';
@@ -580,7 +580,7 @@
 
             if (window.innerWidth < 768 && activeMobileTab !== 'orderbook') return;
 
-            // Asks
+            // Asks (Venta)
             if (asksContainer && data.asks) {
               let asksHTML = '';
               const maxAskQty = Math.max(...data.asks.map(a => a[1]), 1);
@@ -597,7 +597,7 @@
               asksContainer.innerHTML = asksHTML;
             }
 
-            // Bids
+            // Bids (Compra)
             if (bidsContainer && data.bids) {
               let bidsHTML = '';
               const maxBidQty = Math.max(...data.bids.map(b => b[1]), 1);
