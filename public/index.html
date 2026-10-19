@@ -2,7 +2,7 @@
 <html lang="es" class="dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>NEXUS RADAR // Institutional Liquidity & Spoof Terminal</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -24,55 +24,59 @@
     .ask-gradient {
       background: linear-gradient(90deg, rgba(255, 51, 102, 0.25) 0%, rgba(255, 51, 102, 0.02) 100%);
     }
+    /* Scrollbars minimalistas */
     ::-webkit-scrollbar { width: 4px; height: 4px; }
     ::-webkit-scrollbar-track { background: #07090e; }
     ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 2px; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   </style>
 </head>
-<body class="h-screen flex flex-col overflow-hidden text-[12px] select-none">
+<body class="min-h-screen md:h-screen flex flex-col overflow-x-hidden md:overflow-hidden text-[12px] select-none">
 
-  <!-- TOP BAR 1: HEADER PRINCIPAL -->
-  <header class="h-11 border-b border-white/10 bg-[#090d14] flex items-center justify-between px-4 shrink-0">
-    <div class="flex items-center gap-5">
+  <!-- TOP BAR 1: HEADER PRINCIPAL RESPONSIVE -->
+  <header class="border-b border-white/10 bg-[#090d14] px-3 md:px-4 py-2 md:py-0 md:h-11 flex flex-col md:flex-row md:items-center justify-between gap-2 shrink-0">
+    <!-- Izquierda: Logo + Par + Precios -->
+    <div class="flex items-center justify-between md:justify-start gap-2.5 md:gap-5 flex-wrap">
       <div class="flex items-center gap-2">
         <span class="w-2.5 h-2.5 rounded-full bg-[#00ff88] shadow-[0_0_8px_#00ff88]"></span>
-        <span class="font-bold text-white tracking-widest text-sm">NEXUS<span class="text-[#00ff88]">RADAR</span> <span class="text-xs text-[#00f2fe] font-normal">TERMINAL</span></span>
+        <span class="font-bold text-white tracking-widest text-xs md:text-sm">NEXUS<span class="text-[#00ff88]">RADAR</span></span>
       </div>
 
-      <div class="flex items-center gap-2 px-2.5 py-0.5 bg-white/[0.03] border border-white/10 rounded">
+      <div class="flex items-center gap-1.5 px-2 py-0.5 bg-white/[0.03] border border-white/10 rounded text-[10px] md:text-xs">
         <span class="font-bold text-white">BTC/USDT</span>
-        <span class="text-[10px] text-gray-400">PERP</span>
-        <span class="text-[10px] px-1 bg-[#00ff88]/20 text-[#00ff88] font-bold rounded">100ms</span>
+        <span class="px-1 bg-[#00ff88]/20 text-[#00ff88] font-bold rounded">100ms</span>
       </div>
 
-      <div class="flex items-center gap-2.5">
-        <span class="text-gray-400 text-[11px]" data-i18n="indexPrice">PRECIO ÍNDICE:</span>
-        <span id="midPrice" class="font-bold text-white text-sm tabular-nums">$ --</span>
-        <span id="spreadBadge" class="text-[10px] px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[#00f2fe]">SPREAD: --</span>
+      <div class="flex items-center gap-2 text-[11px] md:text-xs">
+        <span id="midPrice" class="font-bold text-white tabular-nums text-sm md:text-base">$ --</span>
+        <span id="spreadBadge" class="text-[9px] md:text-[10px] px-1.5 py-0.5 rounded bg-white/5 border border-white/10 text-[#00f2fe]">SPREAD: --</span>
       </div>
     </div>
 
-    <!-- HUSO HORARIO LOCAL DEL USUARIO & SELECTOR IDIOMA -->
-    <div class="flex items-center gap-4 text-[11px]">
-      <div class="flex items-center gap-1.5 text-gray-300">
+    <!-- Derecha: Reloj Local + Idioma + Ayuda -->
+    <div class="flex items-center justify-between md:justify-end gap-3 text-[11px] border-t md:border-t-0 border-white/5 pt-1 md:pt-0">
+      <div class="flex items-center gap-1.5 text-gray-300 text-[10px] md:text-[11px]">
         <span class="text-gray-500">LOCAL:</span>
         <span id="localClock" class="font-bold text-white tabular-nums">--:--:--</span>
-        <span class="text-gray-500 text-[10px]">(<span id="utcClock" class="text-[#00f2fe]">--:-- UTC</span>)</span>
+        <span class="text-gray-500 hidden sm:inline">(<span id="utcClock" class="text-[#00f2fe]">--:-- UTC</span>)</span>
       </div>
 
-      <div class="border-l border-white/10 pl-3 flex items-center gap-1 font-bold">
-        <button id="btnLangES" onclick="setLanguage('es')" class="px-1.5 py-0.5 rounded bg-[#00ff88]/20 text-[#00ff88]">ES</button>
-        <span class="text-gray-600">/</span>
-        <button id="btnLangEN" onclick="setLanguage('en')" class="px-1.5 py-0.5 rounded hover:bg-white/5 text-gray-400">EN</button>
-      </div>
+      <div class="flex items-center gap-2">
+        <div class="flex items-center gap-1 font-bold text-[10px] md:text-xs">
+          <button id="btnLangES" onclick="setLanguage('es')" class="px-1.5 py-0.5 rounded bg-[#00ff88]/20 text-[#00ff88]">ES</button>
+          <span class="text-gray-600">/</span>
+          <button id="btnLangEN" onclick="setLanguage('en')" class="px-1.5 py-0.5 rounded hover:bg-white/5 text-gray-400">EN</button>
+        </div>
 
-      <button onclick="toggleHelpModal()" class="px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold" title="Guía rápida">?</button>
+        <button onclick="toggleHelpModal()" class="px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold text-xs" title="Guía rápida">?</button>
+      </div>
     </div>
   </header>
 
-  <!-- TOP BAR 2: MONITOR DE BOLSAS DEL MUNDO -->
-  <div class="h-8 border-b border-white/10 bg-[#06080c] flex items-center justify-between px-4 text-[10px] font-mono shrink-0">
-    <div class="flex items-center gap-6">
+  <!-- TOP BAR 2: MONITOR DE BOLSAS MUNDIALES (SCROLLABLE EN MOBILE) -->
+  <div class="border-b border-white/10 bg-[#06080c] px-3 md:px-4 py-1.5 md:h-8 flex items-center justify-between overflow-x-auto no-scrollbar text-[10px] font-mono shrink-0">
+    <div class="flex items-center gap-4 md:gap-6 whitespace-nowrap min-w-max">
       <span class="text-gray-500 font-bold uppercase tracking-wider" data-i18n="marketSessions">SESIONES:</span>
 
       <!-- NUEVA YORK -->
@@ -111,42 +115,52 @@
         <span id="badge-syd" class="px-1 py-0.2 rounded text-[9px] bg-gray-800 text-gray-400 font-bold">CLOSED</span>
       </div>
     </div>
-
-    <div class="text-gray-400">
-      FEED: <span class="text-[#00ff88]">BINANCE FUTURES L2</span>
-    </div>
   </div>
 
-  <!-- BODY GRID (3 PANELES) -->
-  <main class="flex-1 grid grid-cols-12 gap-1.5 p-1.5 overflow-hidden">
+  <!-- SELECTOR DE PESTAÑAS (TABS) EXCLUSIVO MOBILE -->
+  <nav class="flex md:hidden bg-[#090d14] border-b border-white/10 text-xs shrink-0 font-medium">
+    <button id="tabBtnOrderbook" onclick="switchMobileTab('orderbook')" class="flex-1 py-2 text-center text-[#00ff88] border-b-2 border-[#00ff88] bg-white/[0.02]" data-i18n="tabDepth">
+      LIBRO L2
+    </button>
+    <button id="tabBtnSpoof" onclick="switchMobileTab('spoof')" class="flex-1 py-2 text-center text-gray-400 border-b-2 border-transparent hover:text-white relative" data-i18n="tabSpoof">
+      SPOOF RADAR
+      <span id="mobileSpoofBadge" class="hidden absolute top-1 right-3 w-2 h-2 rounded-full bg-[#ff3366] animate-ping"></span>
+    </button>
+    <button id="tabBtnNews" onclick="switchMobileTab('news')" class="flex-1 py-2 text-center text-gray-400 border-b-2 border-transparent hover:text-white" data-i18n="tabNews">
+      NOTICIAS
+    </button>
+  </nav>
 
-    <!-- COLUMNA 1: ORDER BOOK EN VIVO (4 COLS) -->
-    <section class="col-span-4 panel-box rounded flex flex-col overflow-hidden">
-      <div class="h-8 border-b border-white/10 px-3 flex items-center justify-between bg-white/[0.02]">
+  <!-- BODY GRID (RESPONSIVE: TABS EN MOBILE / 3 COLS EN DESKTOP) -->
+  <main class="flex-1 p-1 md:p-1.5 overflow-y-auto md:overflow-hidden grid grid-cols-1 md:grid-cols-12 gap-1.5">
+
+    <!-- COLUMNA 1: ORDER BOOK EN VIVO -->
+    <section id="panelOrderbook" class="col-span-1 md:col-span-4 panel-box rounded flex flex-col h-[520px] md:h-full overflow-hidden">
+      <div class="h-8 border-b border-white/10 px-3 flex items-center justify-between bg-white/[0.02] shrink-0">
         <span class="font-bold text-white text-[11px] tracking-wide" data-i18n="depthTitle">PROFUNDIDAD DE MERCADO (L2)</span>
         <span class="text-[10px] text-gray-400" data-i18n="sizeBtc">TAMAÑO (BTC)</span>
       </div>
 
       <!-- ASKS (Venta) -->
-      <div class="flex-1 flex flex-col justify-end p-2 border-b border-white/5">
+      <div class="flex-1 flex flex-col justify-end p-2 border-b border-white/5 overflow-hidden">
         <div id="asksContainer" class="flex flex-col-reverse gap-0.5"></div>
       </div>
 
       <!-- MID SPREAD BAR -->
-      <div class="h-7 bg-white/[0.02] border-y border-white/10 px-3 flex items-center justify-between text-[11px]">
+      <div class="h-7 bg-white/[0.02] border-y border-white/10 px-3 flex items-center justify-between text-[11px] shrink-0">
         <span class="text-gray-400" data-i18n="lastMid">ÚLTIMO MID</span>
         <span id="midCenter" class="text-white font-bold tabular-nums">--</span>
       </div>
 
       <!-- BIDS (Compra) -->
-      <div class="flex-1 flex flex-col p-2">
+      <div class="flex-1 flex flex-col p-2 overflow-hidden">
         <div id="bidsContainer" class="flex flex-col gap-0.5"></div>
       </div>
     </section>
 
-    <!-- COLUMNA 2: DETECTOR DE SPOOFING & MUROS FALSOS (5 COLS) -->
-    <section class="col-span-5 panel-box rounded flex flex-col overflow-hidden">
-      <div class="h-8 border-b border-white/10 px-3 flex items-center justify-between bg-white/[0.02]">
+    <!-- COLUMNA 2: DETECTOR DE SPOOFING -->
+    <section id="panelSpoof" class="hidden md:flex col-span-1 md:col-span-5 panel-box rounded flex-col h-[520px] md:h-full overflow-hidden">
+      <div class="h-8 border-b border-white/10 px-3 flex items-center justify-between bg-white/[0.02] shrink-0">
         <div class="flex items-center gap-2">
           <span class="w-2 h-2 rounded-full bg-[#ff3366] animate-pulse"></span>
           <span class="font-bold text-white text-[11px] tracking-wide" data-i18n="spoofTitle">DETECCIÓN DE SPOOFING INSTITUCIONAL</span>
@@ -166,33 +180,33 @@
               <th data-i18n="thLevel">NIVEL</th>
             </tr>
           </thead>
-          <tbody id="alertsBody" class="divide-y divide-white/[0.04] tabular-nums"></tbody>
+          <tbody id="alertsBody" class="divide-y divide-white/[0.04] tabular-nums text-[10px] md:text-[11px]"></tbody>
         </table>
-        <div id="noAlerts" class="h-40 flex items-center justify-center text-gray-500 text-xs" data-i18n="scanningText">
+        <div id="noAlerts" class="h-40 flex items-center justify-center text-gray-500 text-xs text-center px-4" data-i18n="scanningText">
           Escaneando cancelaciones institucionales en microsegundos...
         </div>
       </div>
     </section>
 
-    <!-- COLUMNA 3: FEED DE NOTICIAS DE IMPACTO & CORRELACIÓN (3 COLS) -->
-    <section class="col-span-3 panel-box rounded flex flex-col overflow-hidden">
-      <div class="h-8 border-b border-white/10 px-3 flex items-center justify-between bg-white/[0.02]">
+    <!-- COLUMNA 3: FEED DE NOTICIAS RÁPIDAS -->
+    <section id="panelNews" class="hidden md:flex col-span-1 md:col-span-3 panel-box rounded flex-col h-[520px] md:h-full overflow-hidden">
+      <div class="h-8 border-b border-white/10 px-3 flex items-center justify-between bg-white/[0.02] shrink-0">
         <span class="font-bold text-white text-[11px] tracking-wide" data-i18n="newsTitle">NOTICIAS DE IMPACTO RÁPIDO</span>
         <span class="text-[10px] text-[#00f2fe] font-bold">LIVE WIRE</span>
       </div>
 
-      <div id="newsContainer" class="flex-1 overflow-y-auto p-2.5 flex flex-col gap-2"></div>
+      <div id="newsContainer" class="flex-1 overflow-y-auto p-2 md:p-2.5 flex flex-col gap-2"></div>
     </section>
 
   </main>
 
-  <!-- FOOTER INSTITUCIONAL MODO IA -->
-  <footer class="h-7 border-t border-white/10 bg-[#06080c] flex items-center justify-between px-4 text-[10px] text-gray-400 font-mono shrink-0">
+  <!-- FOOTER INSTITUCIONAL -->
+  <footer class="border-t border-white/10 bg-[#06080c] px-3 md:px-4 py-1.5 md:h-7 flex flex-col sm:flex-row items-center justify-between gap-1 text-[10px] text-gray-400 font-mono shrink-0">
     <div class="flex items-center gap-2">
       <span class="w-1.5 h-1.5 rounded-full bg-[#00ff88]"></span>
-      <span>NEXUS RADAR v1.0.4</span>
-      <span class="text-gray-600">|</span>
-      <span data-i18n="footerTagline">Inteligencia Cuantitativa &amp; Microestructura L2</span>
+      <span>NEXUS RADAR v1.0.5</span>
+      <span class="text-gray-600 hidden sm:inline">|</span>
+      <span class="hidden sm:inline" data-i18n="footerTagline">Inteligencia Cuantitativa &amp; Microestructura L2</span>
     </div>
 
     <div>
@@ -203,10 +217,10 @@
 
   <!-- MODAL DE AYUDA RÁPIDA -->
   <div id="helpModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-    <div class="panel-box max-w-lg w-full p-5 rounded-lg border border-white/20 shadow-2xl space-y-4">
+    <div class="panel-box max-w-lg w-full p-5 rounded-lg border border-white/20 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-white/10 pb-2">
-        <h3 class="text-white font-bold text-sm tracking-wide" data-i18n="modalTitle">GUÍA RÁPIDA // CÓMO INTERPRETAR LA TERMINAL</h3>
-        <button onclick="toggleHelpModal()" class="text-gray-400 hover:text-white font-bold">✕</button>
+        <h3 class="text-white font-bold text-xs md:text-sm tracking-wide" data-i18n="modalTitle">GUÍA RÁPIDA // CÓMO INTERPRETAR LA TERMINAL</h3>
+        <button onclick="toggleHelpModal()" class="text-gray-400 hover:text-white font-bold p-1">✕</button>
       </div>
       
       <div class="space-y-3 text-[11px] text-gray-300">
@@ -224,13 +238,69 @@
         </div>
       </div>
 
-      <button onclick="toggleHelpModal()" class="w-full py-1.5 rounded bg-[#00ff88]/20 text-[#00ff88] border border-[#00ff88]/40 font-bold hover:bg-[#00ff88]/30" data-i18n="modalCloseBtn">CERRAR</button>
+      <button onclick="toggleHelpModal()" class="w-full py-2 rounded bg-[#00ff88]/20 text-[#00ff88] border border-[#00ff88]/40 font-bold hover:bg-[#00ff88]/30 text-xs" data-i18n="modalCloseBtn">CERRAR</button>
     </div>
   </div>
 
   <script>
     // ─────────────────────────────────────────────────────────────
-    // 1. GESTIÓN ROBUSTA DE HORARIOS Y SESIONES DE BOLSA
+    // 1. MANEJO DE PESTAÑAS (TABS) EN MOBILE
+    // ─────────────────────────────────────────────────────────────
+    let activeMobileTab = 'orderbook';
+
+    function switchMobileTab(tab) {
+      if (window.innerWidth >= 768) return; // En desktop se muestran las 3 juntas
+      activeMobileTab = tab;
+
+      const pOrderbook = document.getElementById('panelOrderbook');
+      const pSpoof = document.getElementById('panelSpoof');
+      const pNews = document.getElementById('panelNews');
+
+      const bOrderbook = document.getElementById('tabBtnOrderbook');
+      const bSpoof = document.getElementById('tabBtnSpoof');
+      const bNews = document.getElementById('tabBtnNews');
+
+      // Ocultar todos
+      pOrderbook.classList.add('hidden');
+      pSpoof.classList.add('hidden');
+      pNews.classList.add('hidden');
+
+      // Resetear estilos de tabs
+      [bOrderbook, bSpoof, bNews].forEach(b => {
+        b.className = 'flex-1 py-2 text-center text-gray-400 border-b-2 border-transparent hover:text-white relative';
+      });
+
+      // Mostrar panel activo
+      if (tab === 'orderbook') {
+        pOrderbook.classList.remove('hidden');
+        bOrderbook.className = 'flex-1 py-2 text-center text-[#00ff88] border-b-2 border-[#00ff88] bg-white/[0.02] font-bold';
+      } else if (tab === 'spoof') {
+        pSpoof.classList.remove('hidden');
+        bSpoof.className = 'flex-1 py-2 text-center text-[#ff3366] border-b-2 border-[#ff3366] bg-white/[0.02] font-bold';
+        document.getElementById('mobileSpoofBadge').classList.add('hidden');
+      } else if (tab === 'news') {
+        pNews.classList.remove('hidden');
+        bNews.className = 'flex-1 py-2 text-center text-[#00f2fe] border-b-2 border-[#00f2fe] bg-white/[0.02] font-bold';
+      }
+    }
+
+    // Autoajuste al redimensionar pantalla
+    window.addEventListener('resize', () => {
+      const pOrderbook = document.getElementById('panelOrderbook');
+      const pSpoof = document.getElementById('panelSpoof');
+      const pNews = document.getElementById('panelNews');
+
+      if (window.innerWidth >= 768) {
+        pOrderbook.classList.remove('hidden');
+        pSpoof.classList.remove('hidden');
+        pNews.classList.remove('hidden');
+      } else {
+        switchMobileTab(activeMobileTab);
+      }
+    });
+
+    // ─────────────────────────────────────────────────────────────
+    // 2. GESTIÓN DE HORARIOS Y SESIONES DE BOLSA
     // ─────────────────────────────────────────────────────────────
     function getTzParts(date, tz) {
       try {
@@ -278,7 +348,6 @@
       try {
         const now = new Date();
 
-        // Reloj local y UTC
         const localEl = document.getElementById('localClock');
         const utcEl = document.getElementById('utcClock');
         if (localEl) localEl.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
@@ -312,7 +381,7 @@
         const sydOpen = sydIsWeekday && (syd.hour >= 10 && syd.hour < 16);
         updateMarketBadge('syd', syd.timeStr, sydOpen);
       } catch (err) {
-        console.error('Error actualizando horarios:', err);
+        console.error('Error horarios:', err);
       }
     }
 
@@ -325,7 +394,7 @@
     }
 
     // ─────────────────────────────────────────────────────────────
-    // 2. DICCIONARIOS DE IDIOMA (i18n) COMPLETOS
+    // 3. DICCIONARIOS DE IDIOMA (i18n)
     // ─────────────────────────────────────────────────────────────
     const I18N = {
       es: {
@@ -358,7 +427,10 @@
         helpStep3Desc: 'Muestra los horarios de Nueva York, Londres, Tokio y Sídney. Si figura en verde (OPEN) el mercado tradicional está abierto e inyectando liquidez fuerte.',
         modalCloseBtn: 'CERRAR',
         footerTagline: 'Inteligencia Cuantitativa & Microestructura L2',
-        footerDev: 'Desarrollado por'
+        footerDev: 'Desarrollado por',
+        tabDepth: 'LIBRO L2',
+        tabSpoof: 'SPOOF RADAR',
+        tabNews: 'NOTICIAS'
       },
       en: {
         indexPrice: 'INDEX PRICE:',
@@ -390,7 +462,10 @@
         helpStep3Desc: 'Displays opening hours for New York, London, Tokyo, and Sydney. When green (OPEN), key macro markets are active and driving liquidity.',
         modalCloseBtn: 'CLOSE',
         footerTagline: 'Quantitative Intelligence & L2 Microstructure',
-        footerDev: 'Engineered by'
+        footerDev: 'Engineered by',
+        tabDepth: 'L2 BOOK',
+        tabSpoof: 'SPOOF RADAR',
+        tabNews: 'NEWS WIRE'
       }
     };
 
@@ -421,7 +496,7 @@
     setLanguage(currentLang);
 
     // ─────────────────────────────────────────────────────────────
-    // 3. CONEXIÓN WEBSOCKET RESILIENTE
+    // 4. CONEXIÓN WEBSOCKET RESILIENTE
     // ─────────────────────────────────────────────────────────────
     const midPriceEl = document.getElementById('midPrice');
     const midCenterEl = document.getElementById('midCenter');
@@ -446,7 +521,7 @@
             if (midCenterEl) midCenterEl.textContent = `$ ${data.midPrice}`;
             if (spreadBadge) spreadBadge.textContent = `${I18N[currentLang].spreadLabel} $ ${data.spread}`;
 
-            // Asks (Venta) - Barras creciendo de IZQUIERDA a DERECHA
+            // Asks (Venta)
             if (asksContainer && data.asks) {
               let asksHTML = '';
               const maxAskQty = Math.max(...data.asks.map(a => a[1]), 1);
@@ -463,7 +538,7 @@
               asksContainer.innerHTML = asksHTML;
             }
 
-            // Bids (Compra) - Barras creciendo de IZQUIERDA a DERECHA
+            // Bids (Compra)
             if (bidsContainer && data.bids) {
               let bidsHTML = '';
               const maxBidQty = Math.max(...data.bids.map(b => b[1]), 1);
@@ -490,9 +565,15 @@
             const translatedType = a.side === 'bid' ? I18N[currentLang].spoofBid : I18N[currentLang].spoofAsk;
             const translatedLevel = a.severidad === 'CRÍTICO' ? I18N[currentLang].criticalLevel : I18N[currentLang].highLevel;
 
+            // Alerta visual en tab mobile si no está seleccionada
+            if (activeMobileTab !== 'spoof') {
+              const bBadge = document.getElementById('mobileSpoofBadge');
+              if (bBadge) bBadge.classList.remove('hidden');
+            }
+
             if (alertsBody) {
               const row = document.createElement('tr');
-              row.className = 'hover:bg-white/[0.02] text-[11px]';
+              row.className = 'hover:bg-white/[0.02] text-[10px] md:text-[11px]';
               row.innerHTML = `
                 <td class="py-1.5 text-gray-400">${clientLocalTime}</td>
                 <td class="font-bold ${color}">${translatedType}</td>
@@ -523,17 +604,12 @@
             }
           }
         } catch (err) {
-          console.error('Error procesando mensaje WS:', err);
+          console.error('Error procesando WS:', err);
         }
       };
 
-      ws.onclose = () => {
-        setTimeout(connectWS, 2000);
-      };
-
-      ws.onerror = () => {
-        try { ws.close(); } catch(e) {}
-      };
+      ws.onclose = () => { setTimeout(connectWS, 2000); };
+      ws.onerror = () => { try { ws.close(); } catch(e) {} };
     }
 
     connectWS();
