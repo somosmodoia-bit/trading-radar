@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>MODO IA // Order Book Radar & Spoof Terminal</title>
+  <title>NEXUS RADAR // Institutional Liquidity & Spoof Terminal</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,11 +18,12 @@
       background-color: #0b0f17;
       border: 1px solid rgba(255, 255, 255, 0.07);
     }
+    /* Gradientes orientados de Izquierda a Derecha */
     .bid-gradient {
-      background: linear-gradient(90deg, rgba(0, 255, 136, 0.18) 0%, rgba(0, 255, 136, 0.02) 100%);
+      background: linear-gradient(90deg, rgba(0, 255, 136, 0.25) 0%, rgba(0, 255, 136, 0.02) 100%);
     }
     .ask-gradient {
-      background: linear-gradient(90deg, rgba(255, 51, 102, 0.18) 0%, rgba(255, 51, 102, 0.02) 100%);
+      background: linear-gradient(90deg, rgba(255, 51, 102, 0.25) 0%, rgba(255, 51, 102, 0.02) 100%);
     }
     ::-webkit-scrollbar { width: 4px; height: 4px; }
     ::-webkit-scrollbar-track { background: #07090e; }
@@ -36,7 +37,7 @@
     <div class="flex items-center gap-5">
       <div class="flex items-center gap-2">
         <span class="w-2.5 h-2.5 rounded-full bg-[#00ff88] shadow-[0_0_8px_#00ff88]"></span>
-        <span class="font-bold text-white tracking-widest text-sm">MODO<span class="text-[#00ff88]">IA</span> <span class="text-xs text-[#00f2fe] font-normal">RADAR</span></span>
+        <span class="font-bold text-white tracking-widest text-sm">NEXUS<span class="text-[#00ff88]">RADAR</span> <span class="text-xs text-[#00f2fe] font-normal">TERMINAL</span></span>
       </div>
 
       <div class="flex items-center gap-2 px-2.5 py-0.5 bg-white/[0.03] border border-white/10 rounded">
@@ -197,15 +198,15 @@
       <div class="space-y-3 text-[11px] text-gray-300">
         <div>
           <span class="text-[#00ff88] font-bold">1. Profundidad de Mercado (Columna Izquierda):</span>
-          <p class="text-gray-400 mt-0.5">Órdenes vivas esperando en Binance Futures: verde para compras y rojo para ventas. Las barras representan volumen acumulado en cada nivel.</p>
+          <p class="text-gray-400 mt-0.5">Órdenes vivas esperando en Binance Futures: verde para compras y rojo para ventas. Las barras representan volumen acumulado creciendo de izquierda a derecha.</p>
         </div>
         <div>
           <span class="text-[#ff3366] font-bold">2. Radar de Spoofing (Columna Centro):</span>
-          <p class="text-gray-400 mt-0.5">Detecta ballenas o algoritmos que colocan órdenes de más de 8 BTC y las cancelan antes de 4.5 segundos para engañar al mercado.</p>
+          <p class="text-gray-400 mt-0.5">Detecta ballenas o algoritmos que colocan órdenes de más de 8 BTC y las cancelan antes de 4.5 segundos para inducir a error al mercado.</p>
         </div>
         <div>
           <span class="text-[#00f2fe] font-bold">3. Sesiones Bursátiles (Barra Superior):</span>
-          <p class="text-gray-400 mt-0.5">Muestra los horarios de Nueva York, Londres, Tokio y Sídney. Si figura en verde (OPEN) el mercado tradicional está abierto y suele inyectar la mayor liquidez y volatilidad.</p>
+          <p class="text-gray-400 mt-0.5">Muestra los horarios de Nueva York, Londres, Tokio y Sídney. Si figura en verde (OPEN) el mercado tradicional está abierto e inyectando liquidez fuerte.</p>
         </div>
       </div>
 
@@ -386,7 +387,7 @@
     setLanguage(currentLang);
 
     // ─────────────────────────────────────────────────────────────
-    // 3. CONEXIÓN WEBSOCKET RESILIENTE
+    // 3. CONEXIÓN WEBSOCKET RESILIENTE (BARRAS DE IZQ A DER)
     // ─────────────────────────────────────────────────────────────
     const midPriceEl = document.getElementById('midPrice');
     const midCenterEl = document.getElementById('midCenter');
@@ -411,7 +412,7 @@
             if (midCenterEl) midCenterEl.textContent = `$ ${data.midPrice}`;
             if (spreadBadge) spreadBadge.textContent = `${I18N[currentLang].spreadLabel} $ ${data.spread}`;
 
-            // Asks (Venta)
+            // Asks (Venta) - Barras creciendo de IZQUIERDA a DERECHA
             if (asksContainer && data.asks) {
               let asksHTML = '';
               const maxAskQty = Math.max(...data.asks.map(a => a[1]), 1);
@@ -419,7 +420,7 @@
                 const pct = Math.min((qty / maxAskQty) * 100, 100).toFixed(0);
                 asksHTML += `
                   <div class="relative flex items-center justify-between px-2 py-0.5 rounded text-[11px] overflow-hidden">
-                    <div class="absolute right-0 top-0 bottom-0 ask-gradient" style="width: ${pct}%"></div>
+                    <div class="absolute left-0 top-0 bottom-0 ask-gradient" style="width: ${pct}%"></div>
                     <span class="text-[#ff3366] font-semibold z-10 tabular-nums">${price.toFixed(2)}</span>
                     <span class="text-white z-10 tabular-nums font-mono">${qty.toFixed(3)}</span>
                   </div>
@@ -428,7 +429,7 @@
               asksContainer.innerHTML = asksHTML;
             }
 
-            // Bids (Compra)
+            // Bids (Compra) - Barras creciendo de IZQUIERDA a DERECHA
             if (bidsContainer && data.bids) {
               let bidsHTML = '';
               const maxBidQty = Math.max(...data.bids.map(b => b[1]), 1);
@@ -436,7 +437,7 @@
                 const pct = Math.min((qty / maxBidQty) * 100, 100).toFixed(0);
                 bidsHTML += `
                   <div class="relative flex items-center justify-between px-2 py-0.5 rounded text-[11px] overflow-hidden">
-                    <div class="absolute right-0 top-0 bottom-0 bid-gradient" style="width: ${pct}%"></div>
+                    <div class="absolute left-0 top-0 bottom-0 bid-gradient" style="width: ${pct}%"></div>
                     <span class="text-[#00ff88] font-semibold z-10 tabular-nums">${price.toFixed(2)}</span>
                     <span class="text-white z-10 tabular-nums font-mono">${qty.toFixed(3)}</span>
                   </div>
