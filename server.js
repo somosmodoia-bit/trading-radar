@@ -46,16 +46,16 @@ setInterval(() => {
   });
 }, 12000);
 
-// Detección institucional calibrada
+// Configuración de Detección Equilibrada para Demo Institucional
 let binanceWs;
-const SPOOF_THRESHOLD_BTC = 20.0;       // Solo muros superiores a 20 BTC (~$1.65M USD)
-const MIN_SPOOF_DURATION_SEC = 0.6;     // Ignorar fluctuaciones de microsegundos
-const MAX_SPOOF_DURATION_SEC = 4.2;     // Retiro intencional antes del trade
+const SPOOF_THRESHOLD_BTC = 8.0;        // Umbral óptimo: 8 BTC (~$650.000 USD)
+const MIN_SPOOF_DURATION_SEC = 0.8;     // Descartar parpadeos de red menores a 800ms
+const MAX_SPOOF_DURATION_SEC = 4.2;     // Ventana táctica de spoofing
 const orderHistory = new Map();
-const alertCooldowns = new Map();       // Evita alertas duplicadas en el mismo rango de precio
+const alertCooldowns = new Map();       // Evita spam del mismo nivel
 
 const SERVER_START_TIME = Date.now();
-const WARMUP_MS = 15000;
+const WARMUP_MS = 10000;                // 10s de espera inicial al arrancar
 
 function connectBinance() {
   try {
@@ -77,9 +77,9 @@ function connectBinance() {
         const now = Date.now();
         const currentActiveKeys = new Set();
 
-        // Monitorear únicamente los 8 mejores niveles
-        const coreBids = bids.slice(0, 8);
-        const coreAsks = asks.slice(0, 8);
+        // Rastreamos los primeros 10 niveles del libro
+        const coreBids = bids.slice(0, 10);
+        const coreAsks = asks.slice(0, 10);
 
         coreBids.forEach(([price, qty]) => {
           const key = `bid_${price.toFixed(2)}`;
@@ -101,19 +101,20 @@ function connectBinance() {
           }
         });
 
-        // Evaluación de spoofing real
+        // Evaluación algorítmica de cancelaciones institucionales
         if (now - SERVER_START_TIME > WARMUP_MS) {
           for (const [key, record] of orderHistory.entries()) {
             if (!currentActiveKeys.has(key)) {
               const duration = (now - record.firstSeen) / 1000;
               const lastAlerted = alertCooldowns.get(key) || 0;
 
+              // Condición: > 8 BTC, entre 0.8s y 4.2s de vida, y sin alerta reciente en ese precio (30s cooldown)
               if (record.qty >= SPOOF_THRESHOLD_BTC && 
                   duration >= MIN_SPOOF_DURATION_SEC && 
                   duration <= MAX_SPOOF_DURATION_SEC &&
-                  (now - lastAlerted > 15000)) { // 15s de cooldown por nivel
+                  (now - lastAlerted > 30000)) {
 
-                // Descartar órdenes ejecutadas
+                // Verificar que no haya sido ejecutada por el mercado
                 const wasExecuted = (record.side === 'ask' && record.price <= bestBid) ||
                                     (record.side === 'bid' && record.price >= bestAsk);
 
@@ -126,7 +127,7 @@ function connectBinance() {
                     volumenBTC: record.qty.toFixed(2),
                     volumenUSD: `$${(record.qty * record.price).toLocaleString('en-US', { maximumFractionDigits: 0 })}`,
                     duracionSeg: duration.toFixed(1),
-                    severidad: record.qty >= 35 ? 'CRÍTICO' : 'ALTO'
+                    severidad: record.qty >= 15 ? 'CRÍTICO' : 'ALTO'
                   };
 
                   ALERTS_HISTORY.unshift(alerta);
@@ -139,13 +140,13 @@ function connectBinance() {
                 }
               }
               orderHistory.delete(key);
-            } else if (now - record.firstSeen > 10000) {
+            } else if (now - record.firstSeen > 12000) {
               orderHistory.delete(key);
             }
           }
         }
 
-        // Emitir Order Book L2
+        // Emitir L2 a terminales
         const l2Payload = JSON.stringify({
           type: 'ORDER_BOOK_UPDATE',
           bids: bids.slice(0, 10),
