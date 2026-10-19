@@ -215,17 +215,293 @@
 
   <script>
     // ─────────────────────────────────────────────────────────────
-    // 1. GESTIÓN DE HORARIOS MUNDIALES Y SESIONES DE BOLSA
+    // 1. GESTIÓN ROBUSTA DE HORARIOS Y SESIONES DE BOLSA
     // ─────────────────────────────────────────────────────────────
+    function getTzParts(date, tz) {
+      try {
+        const parts = new Intl.DateTimeFormat('en-US', {
+          timeZone: tz,
+          hourCycle: 'h23',
+          weekday: 'short',
+          hour: '2-digit',
+          minute: '2-digit'
+        }).formatToParts(date);
+
+        const map = {};
+        parts.forEach(p => map[p.type] = p.value);
+        return {
+          day: map.weekday || 'Mon',
+          hour: parseInt(map.hour || '0', 10),
+          min: parseInt(map.minute || '0', 10),
+          timeStr: `${map.hour}:${map.minute}`
+        };
+      } catch (e) {
+        return { day: 'Mon', hour: 0, min: 0, timeStr: '--:--' };
+      }
+    }
+
+    function updateMarketBadge(id, timeText, isOpen) {
+      const timeEl = document.getElementById(`time-${id}`);
+      const dot = document.getElementById(`dot-${id}`);
+      const badge = document.getElementById(`badge-${id}`);
+
+      if (timeEl) timeEl.textContent = timeText;
+      if (!dot || !badge) return;
+
+      if (isOpen) {
+        dot.className = 'w-1.5 h-1.5 rounded-full bg-[#00ff88] shadow-[0_0_6px_#00ff88] animate-pulse';
+        badge.className = 'px-1 py-0.2 rounded text-[9px] bg-[#00ff88]/20 text-[#00ff88] font-bold';
+        badge.textContent = 'OPEN';
+      } else {
+        dot.className = 'w-1.5 h-1.5 rounded-full bg-gray-600';
+        badge.className = 'px-1 py-0.2 rounded text-[9px] bg-white/5 text-gray-500 font-medium';
+        badge.textContent = 'CLOSED';
+      }
+    }
+
     function actualizarHorariosMundiales() {
-      const now = new Date();
+      try {
+        const now = new Date();
 
-      // Reloj local y UTC
-      const localStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-      const utcHours = String(now.getUTCHours()).padStart(2, '0');
-      const utcMins = String(now.getUTCMinutes()).padStart(2, '0');
-      document.getElementById('localClock').textContent = localStr;
-      document.getElementById('utcClock').textContent = `${utcHours}:${utcMins} UTC`;
+        // Reloj local y UTC
+        const localEl = document.getElementById('localClock');
+        const utcEl = document.getElementById('utcClock');
+        if (localEl) localEl.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+        if (utcEl) {
+          const uH = String(now.getUTCHours()).padStart(2, '0');
+          const uM = String(now.getUTCMinutes()).padStart(2, '0');
+          utcEl.textContent = `${uH}:${uM} UTC`;
+        }
 
-      // Auxiliares por zona horaria
-      const opcionesHora = (tz) => ({ timeZone: tz, hour
+        // New York (NYSE: Lun-Vie 09:30 - 16:00 EDT)
+        const ny = getTzParts(now, 'America/New_York');
+        const nyIsWeekday = !['Sat', 'Sun'].includes(ny.day);
+        const nyOpen = nyIsWeekday && ((ny.hour > 9 || (ny.hour === 9 && ny.min >= 30)) && ny.hour < 16);
+        updateMarketBadge('ny', ny.timeStr, nyOpen);
+
+        // London (LSE: Lun-Vie 08:00 - 16:30 BST)
+        const lon = getTzParts(now, 'Europe/London');
+        const lonIsWeekday = !['Sat', 'Sun'].includes(lon.day);
+        const lonOpen = lonIsWeekday && (lon.hour >= 8 && (lon.hour < 16 || (lon.hour === 16 && lon.min <= 30)));
+        updateMarketBadge('lon', lon.timeStr, lonOpen);
+
+        // Tokyo (TSE: Lun-Vie 09:00 - 15:00 JST)
+        const tok = getTzParts(now, 'Asia/Tokyo');
+        const tokIsWeekday = !['Sat', 'Sun'].includes(tok.day);
+        const tokOpen = tokIsWeekday && (tok.hour >= 9 && tok.hour < 15);
+        updateMarketBadge('tok', tok.timeStr, tokOpen);
+
+        // Sydney (ASX: Lun-Vie 10:00 - 16:00 AEST)
+        const syd = getTzParts(now, 'Australia/Sydney');
+        const sydIsWeekday = !['Sat', 'Sun'].includes(syd.day);
+        const sydOpen = sydIsWeekday && (syd.hour >= 10 && syd.hour < 16);
+        updateMarketBadge('syd', syd.timeStr, sydOpen);
+      } catch (err) {
+        console.error('Error actualizando horarios:', err);
+      }
+    }
+
+    setInterval(actualizarHorariosMundiales, 1000);
+    actualizarHorariosMundiales();
+
+    function toggleHelpModal() {
+      const m = document.getElementById('helpModal');
+      if (m) m.classList.toggle('hidden');
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // 2. DICCIONARIOS DE IDIOMA (i18n)
+    // ─────────────────────────────────────────────────────────────
+    const I18N = {
+      es: {
+        indexPrice: 'PRECIO ÍNDICE:',
+        marketSessions: 'SESIONES:',
+        depthTitle: 'PROFUNDIDAD DE MERCADO (L2)',
+        sizeBtc: 'TAMAÑO (BTC)',
+        lastMid: 'ÚLTIMO MID',
+        spoofTitle: 'DETECCIÓN DE SPOOFING INSTITUCIONAL',
+        filterBtc: 'FILTRO > 8 BTC',
+        thTime: 'HORA (LOCAL)',
+        thType: 'TIPO',
+        thPrice: 'PRECIO',
+        thVol: 'VOL BTC',
+        thDuration: 'DURACIÓN',
+        thLevel: 'NIVEL',
+        scanningText: 'Escaneando cancelaciones institucionales en microsegundos...',
+        newsTitle: 'NOTICIAS DE IMPACTO RÁPIDO',
+        spreadLabel: 'SPREAD:',
+        criticalLevel: 'CRÍTICO',
+        highLevel: 'ALTO',
+        spoofBid: 'SPOOF COMPRA (Pared Falsa)',
+        spoofAsk: 'SPOOF VENTA (Pared Falsa)'
+      },
+      en: {
+        indexPrice: 'INDEX PRICE:',
+        marketSessions: 'SESSIONS:',
+        depthTitle: 'MARKET DEPTH (L2)',
+        sizeBtc: 'SIZE (BTC)',
+        lastMid: 'LAST MID',
+        spoofTitle: 'INSTITUTIONAL SPOOFING RADAR',
+        filterBtc: 'FILTER > 8 BTC',
+        thTime: 'TIME (LOCAL)',
+        thType: 'TYPE',
+        thPrice: 'PRICE',
+        thVol: 'VOL BTC',
+        thDuration: 'DURATION',
+        thLevel: 'LEVEL',
+        scanningText: 'Scanning institutional cancellations at microsecond speed...',
+        newsTitle: 'BREAKING IMPACT NEWS',
+        spreadLabel: 'SPREAD:',
+        criticalLevel: 'CRITICAL',
+        highLevel: 'HIGH',
+        spoofBid: 'BID SPOOF (Fake Wall)',
+        spoofAsk: 'ASK SPOOF (Fake Wall)'
+      }
+    };
+
+    let userLocale = (navigator.languages && navigator.languages[0]) || navigator.language || 'en';
+    let currentLang = userLocale.toLowerCase().startsWith('es') ? 'es' : 'en';
+
+    function setLanguage(lang) {
+      currentLang = lang;
+      const dict = I18N[lang];
+      document.querySelectorAll('[data-i18n]').forEach((el) => {
+        const key = el.getAttribute('data-i18n');
+        if (dict[key]) el.textContent = dict[key];
+      });
+
+      const btnES = document.getElementById('btnLangES');
+      const btnEN = document.getElementById('btnLangEN');
+      if (btnES && btnEN) {
+        if (lang === 'es') {
+          btnES.className = 'px-1.5 py-0.5 rounded bg-[#00ff88]/20 text-[#00ff88]';
+          btnEN.className = 'px-1.5 py-0.5 rounded hover:bg-white/5 text-gray-400';
+        } else {
+          btnEN.className = 'px-1.5 py-0.5 rounded bg-[#00f2fe]/20 text-[#00f2fe]';
+          btnES.className = 'px-1.5 py-0.5 rounded hover:bg-white/5 text-gray-400';
+        }
+      }
+    }
+
+    setLanguage(currentLang);
+
+    // ─────────────────────────────────────────────────────────────
+    // 3. CONEXIÓN WEBSOCKET RESILIENTE
+    // ─────────────────────────────────────────────────────────────
+    const midPriceEl = document.getElementById('midPrice');
+    const midCenterEl = document.getElementById('midCenter');
+    const spreadBadge = document.getElementById('spreadBadge');
+    const asksContainer = document.getElementById('asksContainer');
+    const bidsContainer = document.getElementById('bidsContainer');
+    const alertsBody = document.getElementById('alertsBody');
+    const noAlerts = document.getElementById('noAlerts');
+    const newsContainer = document.getElementById('newsContainer');
+
+    function connectWS() {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${protocol}//${window.location.host}`;
+      const ws = new WebSocket(wsUrl);
+
+      ws.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+
+          if (data.type === 'ORDER_BOOK_UPDATE') {
+            if (midPriceEl) midPriceEl.textContent = `$ ${data.midPrice}`;
+            if (midCenterEl) midCenterEl.textContent = `$ ${data.midPrice}`;
+            if (spreadBadge) spreadBadge.textContent = `${I18N[currentLang].spreadLabel} $ ${data.spread}`;
+
+            // Asks (Venta)
+            if (asksContainer && data.asks) {
+              let asksHTML = '';
+              const maxAskQty = Math.max(...data.asks.map(a => a[1]), 1);
+              data.asks.forEach(([price, qty]) => {
+                const pct = Math.min((qty / maxAskQty) * 100, 100).toFixed(0);
+                asksHTML += `
+                  <div class="relative flex items-center justify-between px-2 py-0.5 rounded text-[11px] overflow-hidden">
+                    <div class="absolute right-0 top-0 bottom-0 ask-gradient" style="width: ${pct}%"></div>
+                    <span class="text-[#ff3366] font-semibold z-10 tabular-nums">${price.toFixed(2)}</span>
+                    <span class="text-white z-10 tabular-nums font-mono">${qty.toFixed(3)}</span>
+                  </div>
+                `;
+              });
+              asksContainer.innerHTML = asksHTML;
+            }
+
+            // Bids (Compra)
+            if (bidsContainer && data.bids) {
+              let bidsHTML = '';
+              const maxBidQty = Math.max(...data.bids.map(b => b[1]), 1);
+              data.bids.forEach(([price, qty]) => {
+                const pct = Math.min((qty / maxBidQty) * 100, 100).toFixed(0);
+                bidsHTML += `
+                  <div class="relative flex items-center justify-between px-2 py-0.5 rounded text-[11px] overflow-hidden">
+                    <div class="absolute right-0 top-0 bottom-0 bid-gradient" style="width: ${pct}%"></div>
+                    <span class="text-[#00ff88] font-semibold z-10 tabular-nums">${price.toFixed(2)}</span>
+                    <span class="text-white z-10 tabular-nums font-mono">${qty.toFixed(3)}</span>
+                  </div>
+                `;
+              });
+              bidsContainer.innerHTML = bidsHTML;
+            }
+          }
+
+          if (data.type === 'ALERT_SPOOF') {
+            if (noAlerts) noAlerts.style.display = 'none';
+            const a = data.alerta;
+            const color = a.side === 'bid' ? 'text-[#00ff88]' : 'text-[#ff3366]';
+            const clientLocalTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+
+            const translatedType = a.side === 'bid' ? I18N[currentLang].spoofBid : I18N[currentLang].spoofAsk;
+            const translatedLevel = a.severidad === 'CRÍTICO' ? I18N[currentLang].criticalLevel : I18N[currentLang].highLevel;
+
+            if (alertsBody) {
+              const row = document.createElement('tr');
+              row.className = 'hover:bg-white/[0.02] text-[11px]';
+              row.innerHTML = `
+                <td class="py-1.5 text-gray-400">${clientLocalTime}</td>
+                <td class="font-bold ${color}">${translatedType}</td>
+                <td class="text-white">${a.price}</td>
+                <td class="font-bold text-white">${a.volumenBTC} <span class="text-[9px] text-gray-500 font-normal">(${a.volumenUSD})</span></td>
+                <td class="text-gray-300">${a.duracionSeg}s</td>
+                <td><span class="px-1.5 py-0.2 rounded text-[9px] font-bold ${a.severidad === 'CRÍTICO' ? 'bg-[#ff3366]/20 text-[#ff3366]' : 'bg-yellow-500/20 text-yellow-400'}">${translatedLevel}</span></td>
+              `;
+              alertsBody.prepend(row);
+            }
+          }
+
+          if (data.type === 'NEWS_TAPE') {
+            const item = data.item;
+            const clientLocalTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+            if (newsContainer) {
+              const card = document.createElement('div');
+              card.className = 'p-2 rounded bg-white/[0.02] border border-white/5 flex flex-col gap-1';
+              card.innerHTML = `
+                <div class="flex items-center justify-between text-[10px]">
+                  <span class="px-1.5 py-0.2 rounded bg-[#00f2fe]/10 text-[#00f2fe] font-bold">${item.source}</span>
+                  <span class="text-gray-400 font-mono">${clientLocalTime}</span>
+                </div>
+                <p class="text-white text-[11px] leading-snug font-medium">${item.title}</p>
+              `;
+              newsContainer.prepend(card);
+              if (newsContainer.children.length > 20) newsContainer.lastChild.remove();
+            }
+          }
+        } catch (err) {
+          console.error('Error procesando mensaje WS:', err);
+        }
+      };
+
+      ws.onclose = () => {
+        setTimeout(connectWS, 2000);
+      };
+
+      ws.onerror = () => {
+        try { ws.close(); } catch(e) {}
+      };
+    }
+
+    connectWS();
+  </script>
+</body>
+</html>
