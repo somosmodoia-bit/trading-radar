@@ -12,7 +12,7 @@ app.get('/health', (req, res) => {
   res.status(200).send('OK');
 });
 
-// Buffer de noticias y alertas para carga inmediata en clientes
+// Buffer de noticias y alertas para nuevos clientes
 const NEWS_HISTORY = [
   { source: "TREE NEWS", title: "US CPI MoM Actual 0.2% (Forecast 0.2%, Previous 0.2%)" },
   { source: "BLOOMBERG", title: "Federal Reserve leaves benchmark rate unchanged at 5.25%-5.50%" },
@@ -46,15 +46,16 @@ setInterval(() => {
   });
 }, 12000);
 
-// Conexión con Binance Futures L2 & Detección Quirúrgica
+// Detección institucional calibrada
 let binanceWs;
-const SPOOF_THRESHOLD_BTC = 12.0;       // Filtrar solo bloques mayores a 12 BTC (~$1M USD)
-const MIN_SPOOF_DURATION_SEC = 0.4;     // Descartar parpadeos de red menores a 400ms
-const MAX_SPOOF_DURATION_SEC = 4.0;     // Ventana máxima institucional
+const SPOOF_THRESHOLD_BTC = 20.0;       // Solo muros superiores a 20 BTC (~$1.65M USD)
+const MIN_SPOOF_DURATION_SEC = 0.6;     // Ignorar fluctuaciones de microsegundos
+const MAX_SPOOF_DURATION_SEC = 4.2;     // Retiro intencional antes del trade
 const orderHistory = new Map();
+const alertCooldowns = new Map();       // Evita alertas duplicadas en el mismo rango de precio
 
 const SERVER_START_TIME = Date.now();
-const WARMUP_MS = 15000;                // 15s de estabilización inicial sin alertas falsas
+const WARMUP_MS = 15000;
 
 function connectBinance() {
   try {
@@ -76,9 +77,9 @@ function connectBinance() {
         const now = Date.now();
         const currentActiveKeys = new Set();
 
-        // 1. Monitorear únicamente los primeros 10 niveles (núcleo del libro)
-        const coreBids = bids.slice(0, 10);
-        const coreAsks = asks.slice(0, 10);
+        // Monitorear únicamente los 8 mejores niveles
+        const coreBids = bids.slice(0, 8);
+        const coreAsks = asks.slice(0, 8);
 
         coreBids.forEach(([price, qty]) => {
           const key = `bid_${price.toFixed(2)}`;
@@ -86,7 +87,6 @@ function connectBinance() {
           if (!orderHistory.has(key)) {
             orderHistory.set(key, { price, qty, side: 'bid', firstSeen: now });
           } else {
-            // Actualizar volumen si la orden muta
             orderHistory.get(key).qty = qty;
           }
         });
@@ -101,31 +101,36 @@ function connectBinance() {
           }
         });
 
-        // 2. Detección precisa de cancelaciones sin falsos positivos de borde
+        // Evaluación de spoofing real
         if (now - SERVER_START_TIME > WARMUP_MS) {
           for (const [key, record] of orderHistory.entries()) {
             if (!currentActiveKeys.has(key)) {
               const duration = (now - record.firstSeen) / 1000;
+              const lastAlerted = alertCooldowns.get(key) || 0;
 
-              // Validar que la orden haya estado viva entre 0.4s y 4.0s con volumen real
-              if (record.qty >= SPOOF_THRESHOLD_BTC && duration >= MIN_SPOOF_DURATION_SEC && duration <= MAX_SPOOF_DURATION_SEC) {
-                
-                // Verificar que no haya sido ejecutada por el precio de mercado actual
+              if (record.qty >= SPOOF_THRESHOLD_BTC && 
+                  duration >= MIN_SPOOF_DURATION_SEC && 
+                  duration <= MAX_SPOOF_DURATION_SEC &&
+                  (now - lastAlerted > 15000)) { // 15s de cooldown por nivel
+
+                // Descartar órdenes ejecutadas
                 const wasExecuted = (record.side === 'ask' && record.price <= bestBid) ||
                                     (record.side === 'bid' && record.price >= bestAsk);
 
                 if (!wasExecuted) {
+                  alertCooldowns.set(key, now);
+
                   const alerta = {
                     side: record.side,
                     price: record.price.toFixed(2),
-                    volumenBTC: record.qty.toFixed(3),
+                    volumenBTC: record.qty.toFixed(2),
                     volumenUSD: `$${(record.qty * record.price).toLocaleString('en-US', { maximumFractionDigits: 0 })}`,
                     duracionSeg: duration.toFixed(1),
-                    severidad: record.qty >= 20 ? 'CRÍTICO' : 'ALTO'
+                    severidad: record.qty >= 35 ? 'CRÍTICO' : 'ALTO'
                   };
 
                   ALERTS_HISTORY.unshift(alerta);
-                  if (ALERTS_HISTORY.length > 30) ALERTS_HISTORY.pop();
+                  if (ALERTS_HISTORY.length > 25) ALERTS_HISTORY.pop();
 
                   const alertPayload = JSON.stringify({ type: 'ALERT_SPOOF', alerta });
                   wss.clients.forEach(c => {
@@ -134,13 +139,13 @@ function connectBinance() {
                 }
               }
               orderHistory.delete(key);
-            } else if (now - record.firstSeen > 12000) {
+            } else if (now - record.firstSeen > 10000) {
               orderHistory.delete(key);
             }
           }
         }
 
-        // 3. Emitir actualización L2 a clientes
+        // Emitir Order Book L2
         const l2Payload = JSON.stringify({
           type: 'ORDER_BOOK_UPDATE',
           bids: bids.slice(0, 10),
@@ -162,14 +167,13 @@ function connectBinance() {
     binanceWs.on('close', () => setTimeout(connectBinance, 2000));
     binanceWs.on('error', () => { try { binanceWs.close(); } catch(e){} });
   } catch (e) {
-    console.error('Error conectando a Binance:', e.message);
+    console.error('Error conectando Binance:', e.message);
     setTimeout(connectBinance, 3000);
   }
 }
 
 connectBinance();
 
-// Conexión cliente frontend
 wss.on('connection', (ws) => {
   try {
     if (NEWS_HISTORY.length > 0) {
@@ -179,7 +183,7 @@ wss.on('connection', (ws) => {
       ws.send(JSON.stringify({ type: 'INIT_ALERTS', items: ALERTS_HISTORY }));
     }
   } catch (err) {
-    console.error('Error enviando paquetes init:', err.message);
+    console.error('Error enviando init:', err.message);
   }
 });
 
