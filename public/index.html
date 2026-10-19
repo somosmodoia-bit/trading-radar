@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MODO IA // Order Book Radar & Spoof Terminal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background-color: #07090e;
+      color: #94a3b8;
+    }
+    .panel-box {
+      background-color: #0b0f17;
+      border: 1px solid rgba(255, 255, 255, 0.07);
+    }
+    .bid-gradient {
+      background: linear-gradient(90deg, rgba(0, 255, 136, 0.18) 0%, rgba(0, 255, 136, 0.02) 100%);
+    }
+    .ask-gradient {
+      background: linear-gradient(90deg, rgba(255, 51, 102, 0.18) 0%, rgba(255, 51, 102, 0.02) 100%);
+    }
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: #07090e; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 2px; }
+  </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden text-[12px] select-none">
+
+  <!-- TOP BAR INSTITUCIONAL -->
+  <header class="h-12 border-b border-white/10 bg-[#090d14] flex items-center justify-between px-4">
+    <div class="flex items-center gap-5">
+      <div class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-[#00ff88] shadow-[0_0_8px_#00ff88]"></span>
+        <span class="font-bold text-white tracking-widest text-sm">MODO<span class="text-[#00ff88]">IA</span> <span class="text-xs text-[#00f2fe] font-normal">RADAR</span></span>
+      </div>
+
+      <div class="flex items-center gap-2 px-3 py-1 bg-white/[0.03] border border-white/10 rounded">
+        <span class="font-bold text-white">BTC/USDT</span>
+        <span class="text-[10px] text-gray-400">PERPETUAL</span>
+        <span class="text-[10px] px-1 bg-[#00ff88]/20 text-[#00ff88] font-bold rounded">100ms</span>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <span class="text-gray-400">PRECIO ÍNDICE:</span>
+        <span id="midPrice" class="font-bold text-white text-base tabular-nums">$ --</span>
+        <span id="spreadBadge" class="text-[10px] px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[#00f2fe]">SPREAD: --</span>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-4 text-[11px]">
+      <div class="flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-[#00ff88] animate-ping"></span>
+        <span class="text-white font-medium">L2 STREAM ONLINE</span>
+      </div>
+      <div class="border-l border-white/10 pl-3 text-gray-400">
+        ALGO: <span class="text-[#00f2fe] font-bold">ANTI_SPOOF_v1</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- BODY GRID (3 PANELES) -->
+  <main class="flex-1 grid grid-cols-12 gap-1.5 p-1.5 overflow-hidden">
+
+    <!-- COLUMNA 1: ORDER BOOK EN VIVO (4 COLS) -->
+    <section class="col-span-4 panel-box rounded flex flex-col overflow-hidden">
+      <div class="h-8 border-b border-white/10 px-3 flex items-center justify-between bg-white/[0.02]">
+        <span class="font-bold text-white text-[11px] tracking-wide">PROFUNDIDAD DE MERCADO (L2)</span>
+        <span class="text-[10px] text-gray-400">TAMAÑO (BTC)</span>
+      </div>
+
+      <!-- ASKS (Venta) -->
+      <div class="flex-1 flex flex-col justify-end p-2 border-b border-white/5">
+        <div id="asksContainer" class="flex flex-col-reverse gap-0.5"></div>
+      </div>
+
+      <!-- MID SPREAD BAR -->
+      <div class="h-7 bg-white/[0.02] border-y border-white/10 px-3 flex items-center justify-between text-[11px]">
+        <span class="text-gray-400">ÚLTIMO MID</span>
+        <span id="midCenter" class="text-white font-bold tabular-nums">--</span>
+      </div>
+
+      <!-- BIDS (Compra) -->
+      <div class="flex-1 flex flex-col p-2">
+        <div id="bidsContainer" class="flex flex-col gap-0.5"></div>
+      </div>
+    </section>
+
+    <!-- COLUMNA 2: DETECTOR DE SPOOFING & MUROS FALSOS (5 COLS) -->
+    <section class="col-span-5 panel-box rounded flex flex-col overflow-hidden">
+      <div class="h-8 border-b border-white/10 px-3 flex items-center justify-between bg-white/[0.02]">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-[#ff3366] animate-pulse"></span>
+          <span class="font-bold text-white text-[11px] tracking-wide">DETECCIÓN DE SPOOFING INSTITUCIONAL</span>
+        </div>
+        <span class="text-[10px] px-1.5 py-0.5 bg-[#ff3366]/20 text-[#ff3366] font-bold rounded">FILTRO &gt; 8 BTC</span>
+      </div>
+
+      <div class="flex-1 overflow-y-auto p-2">
+        <table class="w-full text-left">
+          <thead>
+            <tr class="text-[10px] text-gray-500 border-b border-white/10 pb-1">
+              <th class="py-1">HORA</th>
+              <th>TIPO</th>
+              <th>PRECIO</th>
+              <th>VOL BTC</th>
+              <th>DURACIÓN</th>
+              <th>NIVEL</th>
+            </tr>
+          </thead>
+          <tbody id="alertsBody" class="divide-y divide-white/[0.04] tabular-nums">
+            <!-- Inyectado por JS -->
+          </tbody>
+        </table>
+        <div id="noAlerts" class="h-40 flex items-center justify-center text-gray-500 text-xs">
+          Escaneando cancelaciones institucionales en microsegundos...
+        </div>
+      </div>
+    </section>
+
+    <!-- COLUMNA 3: FEED DE NOTICIAS DE IMPACTO & CORRELACIÓN (3 COLS) -->
+    <section class="col-span-3 panel-box rounded flex flex-col overflow-hidden">
+      <div class="h-8 border-b border-white/10 px-3 flex items-center justify-between bg-white/[0.02]">
+        <span class="font-bold text-white text-[11px] tracking-wide">NOTICIAS DE IMPACTO RÁPIDO</span>
+        <span class="text-[10px] text-[#00f2fe] font-bold">LIVE WIRE</span>
+      </div>
+
+      <div id="newsContainer" class="flex-1 overflow-y-auto p-2.5 flex flex-col gap-2">
+        <!-- Inyectado por JS -->
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const ws = new WebSocket(`${protocol}//${window.location.host}`);
+
+    const midPriceEl = document.getElementById('midPrice');
+    const midCenterEl = document.getElementById('midCenter');
+    const spreadBadge = document.getElementById('spreadBadge');
+    const asksContainer = document.getElementById('asksContainer');
+    const bidsContainer = document.getElementById('bidsContainer');
+    const alertsBody = document.getElementById('alertsBody');
+    const noAlerts = document.getElementById('noAlerts');
+    const newsContainer = document.getElementById('newsContainer');
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+
+      if (data.type === 'ORDER_BOOK_UPDATE') {
+        midPriceEl.textContent = `$ ${data.midPrice}`;
+        midCenterEl.textContent = `$ ${data.midPrice}`;
+        spreadBadge.textContent = `SPREAD: $ ${data.spread}`;
+
+        // Render Asks
+        let asksHTML = '';
+        const maxAskQty = Math.max(...data.asks.map(a => a[1]), 1);
+        data.asks.forEach(([price, qty]) => {
+          const pct = Math.min((qty / maxAskQty) * 100, 100).toFixed(0);
+          asksHTML += `
+            <div class="relative flex items-center justify-between px-2 py-0.5 rounded text-[11px] overflow-hidden">
+              <div class="absolute right-0 top-0 bottom-0 ask-gradient" style="width: ${pct}%"></div>
+              <span class="text-[#ff3366] font-semibold z-10 tabular-nums">${price.toFixed(2)}</span>
+              <span class="text-white z-10 tabular-nums font-mono">${qty.toFixed(3)}</span>
+            </div>
+          `;
+        });
+        asksContainer.innerHTML = asksHTML;
+
+        // Render Bids
+        let bidsHTML = '';
+        const maxBidQty = Math.max(...data.bids.map(b => b[1]), 1);
+        data.bids.forEach(([price, qty]) => {
+          const pct = Math.min((qty / maxBidQty) * 100, 100).toFixed(0);
+          bidsHTML += `
+            <div class="relative flex items-center justify-between px-2 py-0.5 rounded text-[11px] overflow-hidden">
+              <div class="absolute right-0 top-0 bottom-0 bid-gradient" style="width: ${pct}%"></div>
+              <span class="text-[#00ff88] font-semibold z-10 tabular-nums">${price.toFixed(2)}</span>
+              <span class="text-white z-10 tabular-nums font-mono">${qty.toFixed(3)}</span>
+            </div>
+          `;
+        });
+        bidsContainer.innerHTML = bidsHTML;
+      }
+
+      if (data.type === 'ALERT_SPOOF') {
+        noAlerts.style.display = 'none';
+        const a = data.alerta;
+        const color = a.side === 'bid' ? 'text-[#00ff88]' : 'text-[#ff3366]';
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-white/[0.02] text-[11px]';
+        row.innerHTML = `
+          <td class="py-1.5 text-gray-400">${a.timestamp}</td>
+          <td class="font-bold ${color}">${a.tipo}</td>
+          <td class="text-white">${a.price}</td>
+          <td class="font-bold text-white">${a.volumenBTC} <span class="text-[9px] text-gray-500 font-normal">(${a.volumenUSD})</span></td>
+          <td class="text-gray-300">${a.duracionSeg}s</td>
+          <td><span class="px-1.5 py-0.2 rounded text-[9px] font-bold ${a.severidad === 'CRÍTICO' ? 'bg-[#ff3366]/20 text-[#ff3366]' : 'bg-yellow-500/20 text-yellow-400'}">${a.severidad}</span></td>
+        `;
+        alertsBody.prepend(row);
+      }
+
+      if (data.type === 'NEWS_TAPE') {
+        const item = data.item;
+        const card = document.createElement('div');
+        card.className = 'p-2 rounded bg-white/[0.02] border border-white/5 flex flex-col gap-1';
+        card.innerHTML = `
+          <div class="flex items-center justify-between text-[10px]">
+            <span class="px-1.5 py-0.2 rounded bg-[#00f2fe]/10 text-[#00f2fe] font-bold">${item.source}</span>
+            <span class="text-gray-500">${item.time}</span>
+          </div>
+          <p class="text-white text-[11px] leading-snug font-medium">${item.title}</p>
+        `;
+        newsContainer.prepend(card);
+        if (newsContainer.children.length > 20) newsContainer.lastChild.remove();
+      }
+    };
+  </script>
+</body>
+</html>
