@@ -18,7 +18,6 @@
       background-color: #0b0f17;
       border: 1px solid rgba(255, 255, 255, 0.07);
     }
-    /* Gradientes orientados de Izquierda a Derecha */
     .bid-gradient {
       background: linear-gradient(90deg, rgba(0, 255, 136, 0.25) 0%, rgba(0, 255, 136, 0.02) 100%);
     }
@@ -187,30 +186,30 @@
 
   </main>
 
-  <!-- MODAL DE AYUDA RÁPIDA -->
+  <!-- MODAL DE AYUDA RÁPIDA (CON TRADUCCIÓN DINÁMICA) -->
   <div id="helpModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="panel-box max-w-lg w-full p-5 rounded-lg border border-white/20 shadow-2xl space-y-4">
       <div class="flex items-center justify-between border-b border-white/10 pb-2">
-        <h3 class="text-white font-bold text-sm tracking-wide">GUÍA RÁPIDA // CÓMO INTERPRETAR LA TERMINAL</h3>
+        <h3 class="text-white font-bold text-sm tracking-wide" data-i18n="modalTitle">GUÍA RÁPIDA // CÓMO INTERPRETAR LA TERMINAL</h3>
         <button onclick="toggleHelpModal()" class="text-gray-400 hover:text-white font-bold">✕</button>
       </div>
       
       <div class="space-y-3 text-[11px] text-gray-300">
         <div>
-          <span class="text-[#00ff88] font-bold">1. Profundidad de Mercado (Columna Izquierda):</span>
-          <p class="text-gray-400 mt-0.5">Órdenes vivas esperando en Binance Futures: verde para compras y rojo para ventas. Las barras representan volumen acumulado creciendo de izquierda a derecha.</p>
+          <span class="text-[#00ff88] font-bold" data-i18n="helpStep1Title">1. Profundidad de Mercado (Columna Izquierda):</span>
+          <p class="text-gray-400 mt-0.5" data-i18n="helpStep1Desc">Órdenes vivas esperando en Binance Futures: verde para compras y rojo para ventas. Las barras representan volumen acumulado creciendo de izquierda a derecha.</p>
         </div>
         <div>
-          <span class="text-[#ff3366] font-bold">2. Radar de Spoofing (Columna Centro):</span>
-          <p class="text-gray-400 mt-0.5">Detecta ballenas o algoritmos que colocan órdenes de más de 8 BTC y las cancelan antes de 4.5 segundos para inducir a error al mercado.</p>
+          <span class="text-[#ff3366] font-bold" data-i18n="helpStep2Title">2. Radar de Spoofing (Columna Centro):</span>
+          <p class="text-gray-400 mt-0.5" data-i18n="helpStep2Desc">Detecta ballenas o algoritmos que colocan órdenes de más de 8 BTC y las cancelan antes de 4.5 segundos para inducir a error al mercado.</p>
         </div>
         <div>
-          <span class="text-[#00f2fe] font-bold">3. Sesiones Bursátiles (Barra Superior):</span>
-          <p class="text-gray-400 mt-0.5">Muestra los horarios de Nueva York, Londres, Tokio y Sídney. Si figura en verde (OPEN) el mercado tradicional está abierto e inyectando liquidez fuerte.</p>
+          <span class="text-[#00f2fe] font-bold" data-i18n="helpStep3Title">3. Sesiones Bursátiles (Barra Superior):</span>
+          <p class="text-gray-400 mt-0.5" data-i18n="helpStep3Desc">Muestra los horarios de Nueva York, Londres, Tokio y Sídney. Si figura en verde (OPEN) el mercado tradicional está abierto e inyectando liquidez fuerte.</p>
         </div>
       </div>
 
-      <button onclick="toggleHelpModal()" class="w-full py-1.5 rounded bg-[#00ff88]/20 text-[#00ff88] border border-[#00ff88]/40 font-bold hover:bg-[#00ff88]/30">CERRAR</button>
+      <button onclick="toggleHelpModal()" class="w-full py-1.5 rounded bg-[#00ff88]/20 text-[#00ff88] border border-[#00ff88]/40 font-bold hover:bg-[#00ff88]/30" data-i18n="modalCloseBtn">CERRAR</button>
     </div>
   </div>
 
@@ -311,7 +310,7 @@
     }
 
     // ─────────────────────────────────────────────────────────────
-    // 2. DICCIONARIOS DE IDIOMA (i18n)
+    // 2. DICCIONARIOS DE IDIOMA (i18n) COMPLETOS
     // ─────────────────────────────────────────────────────────────
     const I18N = {
       es: {
@@ -334,7 +333,15 @@
         criticalLevel: 'CRÍTICO',
         highLevel: 'ALTO',
         spoofBid: 'SPOOF COMPRA (Pared Falsa)',
-        spoofAsk: 'SPOOF VENTA (Pared Falsa)'
+        spoofAsk: 'SPOOF VENTA (Pared Falsa)',
+        modalTitle: 'GUÍA RÁPIDA // CÓMO INTERPRETAR LA TERMINAL',
+        helpStep1Title: '1. Profundidad de Mercado (Columna Izquierda):',
+        helpStep1Desc: 'Órdenes vivas esperando en Binance Futures: verde para compras y rojo para ventas. Las barras representan volumen acumulado creciendo de izquierda a derecha.',
+        helpStep2Title: '2. Radar de Spoofing (Columna Centro):',
+        helpStep2Desc: 'Detecta ballenas o algoritmos que colocan órdenes de más de 8 BTC y las cancelan antes de 4.5 segundos para inducir a error al mercado.',
+        helpStep3Title: '3. Sesiones Bursátiles (Barra Superior):',
+        helpStep3Desc: 'Muestra los horarios de Nueva York, Londres, Tokio y Sídney. Si figura en verde (OPEN) el mercado tradicional está abierto e inyectando liquidez fuerte.',
+        modalCloseBtn: 'CERRAR'
       },
       en: {
         indexPrice: 'INDEX PRICE:',
@@ -356,7 +363,15 @@
         criticalLevel: 'CRITICAL',
         highLevel: 'HIGH',
         spoofBid: 'BID SPOOF (Fake Wall)',
-        spoofAsk: 'ASK SPOOF (Fake Wall)'
+        spoofAsk: 'ASK SPOOF (Fake Wall)',
+        modalTitle: 'QUICK START // HOW TO READ THE TERMINAL',
+        helpStep1Title: '1. Market Depth (Left Column):',
+        helpStep1Desc: 'Live orders resting on Binance Futures: green for bids and red for asks. Bars show cumulative volume growing from left to right.',
+        helpStep2Title: '2. Spoofing Radar (Center Column):',
+        helpStep2Desc: 'Detects institutional entities or bots placing large orders (> 8 BTC) and cancelling within 4.5s to manipulate price action.',
+        helpStep3Title: '3. Trading Sessions (Top Bar):',
+        helpStep3Desc: 'Displays opening hours for New York, London, Tokyo, and Sydney. When green (OPEN), key macro markets are active and driving liquidity.',
+        modalCloseBtn: 'CLOSE'
       }
     };
 
@@ -387,7 +402,7 @@
     setLanguage(currentLang);
 
     // ─────────────────────────────────────────────────────────────
-    // 3. CONEXIÓN WEBSOCKET RESILIENTE (BARRAS DE IZQ A DER)
+    // 3. CONEXIÓN WEBSOCKET RESILIENTE
     // ─────────────────────────────────────────────────────────────
     const midPriceEl = document.getElementById('midPrice');
     const midCenterEl = document.getElementById('midCenter');
@@ -412,7 +427,7 @@
             if (midCenterEl) midCenterEl.textContent = `$ ${data.midPrice}`;
             if (spreadBadge) spreadBadge.textContent = `${I18N[currentLang].spreadLabel} $ ${data.spread}`;
 
-            // Asks (Venta) - Barras creciendo de IZQUIERDA a DERECHA
+            // Asks (Venta)
             if (asksContainer && data.asks) {
               let asksHTML = '';
               const maxAskQty = Math.max(...data.asks.map(a => a[1]), 1);
@@ -429,7 +444,7 @@
               asksContainer.innerHTML = asksHTML;
             }
 
-            // Bids (Compra) - Barras creciendo de IZQUIERDA a DERECHA
+            // Bids (Compra)
             if (bidsContainer && data.bids) {
               let bidsHTML = '';
               const maxBidQty = Math.max(...data.bids.map(b => b[1]), 1);
