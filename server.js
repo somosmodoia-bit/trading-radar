@@ -1,97 +1,58 @@
-import express from 'express';
-import http from 'http';
-import { WebSocketServer, WebSocket } from 'ws';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const express = require('express');
+const http = require('http');
+const WebSocket = require('ws');
 
 const app = express();
 const server = http.createServer(app);
-const wss = new WebSocketServer({ server });
+const wss = new WebSocket.Server({ server });
 
-const PORT = process.env.PORT || 10000;
+app.use(express.static('public'));
 
-app.use(express.static(path.join(__dirname, 'public')));
-app.get('/health', (req, res) => res.status(200).send('OK'));
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
 
-// Estado en memoria
-const recentAlerts = [];
-const orderMemory = new Map(); // price_side -> { qty, timestamp, side, price }
+// Buffer de últimas noticias y alertas para envío instantáneo a nuevos clientes (mobile/desktop)
+const NEWS_HISTORY = [];
+const ALERTS_HISTORY = [];
 
-// Broadcast a los clientes conectados
-function broadcast(data) {
-  const payload = JSON.stringify(data);
-  wss.clients.forEach((client) => {
+const NEWS_MOCK = [
+  { source: "TREE NEWS", title: "US CPI MoM Actual 0.2% (Forecast 0.2%, Previous 0.2%)" },
+  { source: "BLOOMBERG", title: "Federal Reserve leaves benchmark rate unchanged at 5.25%-5.50%" },
+  { source: "TREE NEWS", title: "BlackRock Bitcoin ETF records +$318M net inflow in single session" },
+  { source: "REUTERS", title: "SEC closes inquiry into Ethereum Foundation without enforcement action" },
+  { source: "TREE NEWS", title: "Whale Alert: 4,500 BTC ($370M) transferred from Coinbase to unknown wallet" },
+  { source: "COINDESK", title: "Funding rates reset across major crypto derivatives exchanges" }
+];
+
+let newsIndex = 0;
+// Sembrar historial inicial
+NEWS_MOCK.forEach(n => NEWS_HISTORY.push(n));
+
+setInterval(() => {
+  const item = NEWS_MOCK[newsIndex % NEWS_MOCK.length];
+  newsIndex++;
+  NEWS_HISTORY.unshift(item);
+  if (NEWS_HISTORY.length > 20) NEWS_HISTORY.pop();
+
+  const msg = JSON.stringify({ type: 'NEWS_TAPE', item });
+  wss.clients.forEach(client => {
     if (client.readyState === WebSocket.OPEN) {
-      client.send(payload);
+      client.send(msg);
     }
   });
-}
+}, 12000);
 
-// ─────────────────────────────────────────────────────────────
-// MOTOR DE DETECCIÓN: SPOOFING & TRAMPAS DE LIQUIDEZ
-// ─────────────────────────────────────────────────────────────
-const THRESHOLD_BTC_SPOOF = 8.0;     // Mínimo de BTC para considerarlo orden institucional
-const MAX_SPOOF_LIFETIME_MS = 4500;  // Si desaparece en menos de 4.5 seg sin tradear -> Spoofing
+// Conexión con Binance Futures L2
+let binanceWs;
+const SPOOF_THRESHOLD_BTC = 8.0;
+const MAX_SPOOF_DURATION_SEC = 4.5;
+const orderHistory = new Map();
 
-function procesarDeteccion(side, price, qty) {
-  const key = `${side}_${price}`;
-  const now = Date.now();
+function connectBinance() {
+  binanceWs = new WebSocket('wss://fstream.binance.com/ws/btcusdt@depth20@100ms');
 
-  if (qty > 0) {
-    if (qty >= THRESHOLD_BTC_SPOOF) {
-      if (!orderMemory.has(key)) {
-        orderMemory.set(key, { qty, timestamp: now, side, price });
-      }
-    }
-  } else {
-    // La orden fue retirada (volumen cayó a 0)
-    if (orderMemory.has(key)) {
-      const prev = orderMemory.get(key);
-      const lifetime = now - prev.timestamp;
-
-      // Si duró menos de 4.5 segundos -> Alerta de muro falso (Spoofing)
-      if (lifetime <= MAX_SPOOF_LIFETIME_MS) {
-        const alerta = {
-          id: Date.now() + Math.random(),
-          timestamp: new Date().toLocaleTimeString('es-AR', { hour12: false }),
-          tipo: side === 'bid' ? 'SPOOFING COMPRA (Fake Wall)' : 'SPOOFING VENTA (Fake Wall)',
-          side,
-          price: prev.price.toFixed(2),
-          volumenBTC: prev.qty.toFixed(3),
-          volumenUSD: (prev.qty * prev.price).toLocaleString('en-US', { style: 'currency', currency: 'USD' }),
-          duracionSeg: (lifetime / 1000).toFixed(1),
-          severidad: prev.qty >= 15 ? 'CRÍTICO' : 'ALTO'
-        };
-
-        recentAlerts.unshift(alerta);
-        if (recentAlerts.length > 30) recentAlerts.pop();
-
-        broadcast({ type: 'ALERT_SPOOF', alerta });
-      }
-      orderMemory.delete(key);
-    }
-  }
-}
-
-// ─────────────────────────────────────────────────────────────
-// CONEXIÓN DIRECTA A BINANCE FUTURES (BTCUSDT @depth20@100ms)
-// ─────────────────────────────────────────────────────────────
-let binanceWS = null;
-
-function conectarBinance() {
-  const symbol = 'btcusdt';
-  const url = `wss://fstream.binance.com/ws/${symbol}@depth20@100ms`;
-
-  binanceWS = new WebSocket(url);
-
-  binanceWS.on('open', () => {
-    console.log('[Binance Futures] Conexión activa a libro L2.');
-  });
-
-  binanceWS.on('message', (raw) => {
+  binanceWs.on('message', (raw) => {
     try {
       const data = JSON.parse(raw);
       if (!data.b || !data.a) return;
@@ -99,60 +60,96 @@ function conectarBinance() {
       const bids = data.b.map(([p, q]) => [parseFloat(p), parseFloat(q)]);
       const asks = data.a.map(([p, q]) => [parseFloat(p), parseFloat(q)]);
 
-      bids.forEach(([p, q]) => procesarDeteccion('bid', p, q));
-      asks.forEach(([p, q]) => procesarDeteccion('ask', p, q));
+      const bestBid = bids[0] ? bids[0][0] : 0;
+      const bestAsk = asks[0] ? asks[0][0] : 0;
+      const midPrice = bestBid && bestAsk ? ((bestBid + bestAsk) / 2).toFixed(2) : '0.00';
+      const spread = bestBid && bestAsk ? (bestAsk - bestBid).toFixed(2) : '0.00';
 
-      const midPrice = ((bids[0][0] + asks[0][0]) / 2).toFixed(2);
-      const spread = (asks[0][0] - bids[0][0]).toFixed(2);
+      const now = Date.now();
+      const currentSnapshotPrices = new Set();
 
-      broadcast({
+      // Evaluar bids
+      bids.forEach(([price, qty]) => {
+        const key = `bid_${price}`;
+        currentSnapshotPrices.add(key);
+        if (!orderHistory.has(key)) {
+          orderHistory.set(key, { price, qty, side: 'bid', firstSeen: now });
+        }
+      });
+
+      // Evaluar asks
+      asks.forEach(([price, qty]) => {
+        const key = `ask_${price}`;
+        currentSnapshotPrices.add(key);
+        if (!orderHistory.has(key)) {
+          orderHistory.set(key, { price, qty, side: 'ask', firstSeen: now });
+        }
+      });
+
+      // Detección de cancelaciones rápidas (Spoofing)
+      for (const [key, record] of orderHistory.entries()) {
+        if (!currentSnapshotPrices.has(key)) {
+          const duration = (now - record.firstSeen) / 1000;
+          if (record.qty >= SPOOF_THRESHOLD_BTC && duration <= MAX_SPOOF_DURATION_SEC) {
+            const alerta = {
+              side: record.side,
+              price: record.price.toFixed(2),
+              volumenBTC: record.qty.toFixed(3),
+              volumenUSD: `$${(record.qty * record.price).toLocaleString('en-US', { maximumFractionDigits: 0 })}`,
+              duracionSeg: duration.toFixed(1),
+              severidad: record.qty >= 15 ? 'CRÍTICO' : 'ALTO'
+            };
+
+            ALERTS_HISTORY.unshift(alerta);
+            if (ALERTS_HISTORY.length > 30) ALERTS_HISTORY.pop();
+
+            const alertPayload = JSON.stringify({ type: 'ALERT_SPOOF', alerta });
+            wss.clients.forEach(c => {
+              if (c.readyState === WebSocket.OPEN) c.send(alertPayload);
+            });
+          }
+          orderHistory.delete(key);
+        } else if (now - record.firstSeen > 10000) {
+          orderHistory.delete(key);
+        }
+      }
+
+      // Broadcast L2 a clientes
+      const l2Payload = JSON.stringify({
         type: 'ORDER_BOOK_UPDATE',
         bids: bids.slice(0, 10),
         asks: asks.slice(0, 10),
         midPrice,
         spread
       });
-    } catch (err) {}
-  });
 
-  binanceWS.on('close', () => {
-    setTimeout(conectarBinance, 2500);
-  });
-
-  binanceWS.on('error', () => {
-    try { binanceWS.close(); } catch(e) {}
-  });
-}
-
-conectarBinance();
-
-// ─────────────────────────────────────────────────────────────
-// FEED DE NOTICIAS DE ALTO IMPACTO (Algorítmico)
-// ─────────────────────────────────────────────────────────────
-const MOCK_NEWS = [
-  { source: 'TREE_NEWS', title: 'FED: ANUNCIA PAUSA EN POLÍTICA MONETARIA Y EVALÚA LIQUIDEZ', impact: 'ALTO' },
-  { source: 'BLOOMBERG', title: 'DATOS DE INFLACIÓN SUBYACENTE EN EE. UU. DESCIENDEN 0.3%', impact: 'MEDIO' },
-  { source: 'TREE_NEWS', title: 'ALERTA ON-CHAIN: 4.200 BTC RETIRADOS DE COLD WALLETS A DERIVADOS', impact: 'ALTO' },
-  { source: 'REUTERS', title: 'COMISIÓN DE VALORES APRUEBA NUEVAS LICENCIAS DE CUSTODIA SPOT', impact: 'MEDIO' },
-  { source: 'COINDESK', title: 'FONDOS INSTITUCIONALES REPORTAN ENTRADA NETA RÉCORD ESTA SEMANA', impact: 'ALTO' }
-];
-
-setInterval(() => {
-  const item = MOCK_NEWS[Math.floor(Math.random() * MOCK_NEWS.length)];
-  broadcast({
-    type: 'NEWS_TAPE',
-    item: {
-      ...item,
-      id: Date.now(),
-      time: new Date().toLocaleTimeString('es-AR', { hour12: false })
+      wss.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(l2Payload);
+        }
+      });
+    } catch (err) {
+      console.error('Error parseando Binance L2:', err);
     }
   });
-}, 15000);
 
+  binanceWs.on('close', () => setTimeout(connectBinance, 2000));
+  binanceWs.on('error', () => { try { binanceWs.close(); } catch(e){} });
+}
+
+connectBinance();
+
+// Al conectar un cliente, enviar buffer inicial inmediato
 wss.on('connection', (ws) => {
-  ws.send(JSON.stringify({ type: 'INIT_ALERTS', alerts: recentAlerts }));
+  if (NEWS_HISTORY.length > 0) {
+    ws.send(JSON.stringify({ type: 'INIT_NEWS', items: NEWS_HISTORY }));
+  }
+  if (ALERTS_HISTORY.length > 0) {
+    ws.send(JSON.stringify({ type: 'INIT_ALERTS', items: ALERTS_HISTORY }));
+  }
 });
 
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`[Trading Terminal] Operando en puerto ${PORT}`);
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`Nexus Radar activo en puerto ${PORT}`);
 });
