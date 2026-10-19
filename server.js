@@ -1,10 +1,10 @@
-const express = require('express');
-const http = require('http');
-const WebSocket = require('ws');
+import express from 'express';
+import http from 'http';
+import { WebSocketServer, WebSocket } from 'ws';
 
 const app = express();
 const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
+const wss = new WebSocketServer({ server });
 
 app.use(express.static('public'));
 
@@ -12,7 +12,7 @@ app.get('/health', (req, res) => {
   res.status(200).send('OK');
 });
 
-// Buffer de últimas noticias y alertas en memoria
+// Buffer de noticias y alertas para carga instantánea en clientes (mobile/desktop)
 const NEWS_HISTORY = [
   { source: "TREE NEWS", title: "US CPI MoM Actual 0.2% (Forecast 0.2%, Previous 0.2%)" },
   { source: "BLOOMBERG", title: "Federal Reserve leaves benchmark rate unchanged at 5.25%-5.50%" },
@@ -58,7 +58,7 @@ function connectBinance() {
 
     binanceWs.on('message', (raw) => {
       try {
-        const data = JSON.parse(raw);
+        const data = JSON.parse(raw.toString());
         if (!data.b || !data.a) return;
 
         const bids = data.b.map(([p, q]) => [parseFloat(p), parseFloat(q)]);
@@ -152,7 +152,7 @@ function connectBinance() {
 
 connectBinance();
 
-// Conexión cliente front
+// Conexión frontend con envío inmediato de historial
 wss.on('connection', (ws) => {
   try {
     if (NEWS_HISTORY.length > 0) {
@@ -162,11 +162,11 @@ wss.on('connection', (ws) => {
       ws.send(JSON.stringify({ type: 'INIT_ALERTS', items: ALERTS_HISTORY }));
     }
   } catch (err) {
-    console.error('Error enviando init:', err.message);
+    console.error('Error enviando paquetes init:', err.message);
   }
 });
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-  console.log(`Nexus Radar activo en puerto ${PORT}`);
+  console.log(`[Trading Terminal] Operando en puerto ${PORT}`);
 });
