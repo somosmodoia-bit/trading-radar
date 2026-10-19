@@ -24,7 +24,6 @@
     .ask-gradient {
       background: linear-gradient(90deg, rgba(255, 51, 102, 0.25) 0%, rgba(255, 51, 102, 0.02) 100%);
     }
-    /* Scrollbars minimalistas */
     ::-webkit-scrollbar { width: 4px; height: 4px; }
     ::-webkit-scrollbar-track { background: #07090e; }
     ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 2px; }
@@ -34,9 +33,8 @@
 </head>
 <body class="min-h-screen md:h-screen flex flex-col overflow-x-hidden md:overflow-hidden text-[12px] select-none">
 
-  <!-- TOP BAR 1: HEADER PRINCIPAL RESPONSIVE -->
+  <!-- TOP BAR 1: HEADER PRINCIPAL -->
   <header class="border-b border-white/10 bg-[#090d14] px-3 md:px-4 py-2 md:py-0 md:h-11 flex flex-col md:flex-row md:items-center justify-between gap-2 shrink-0">
-    <!-- Izquierda: Logo + Par + Precios -->
     <div class="flex items-center justify-between md:justify-start gap-2.5 md:gap-5 flex-wrap">
       <div class="flex items-center gap-2">
         <span class="w-2.5 h-2.5 rounded-full bg-[#00ff88] shadow-[0_0_8px_#00ff88]"></span>
@@ -54,7 +52,6 @@
       </div>
     </div>
 
-    <!-- Derecha: Reloj Local + Idioma + Ayuda -->
     <div class="flex items-center justify-between md:justify-end gap-3 text-[11px] border-t md:border-t-0 border-white/5 pt-1 md:pt-0">
       <div class="flex items-center gap-1.5 text-gray-300 text-[10px] md:text-[11px]">
         <span class="text-gray-500">LOCAL:</span>
@@ -74,12 +71,11 @@
     </div>
   </header>
 
-  <!-- TOP BAR 2: MONITOR DE BOLSAS MUNDIALES (SCROLLABLE EN MOBILE) -->
+  <!-- TOP BAR 2: MONITOR DE BOLSAS MUNDIALES -->
   <div class="border-b border-white/10 bg-[#06080c] px-3 md:px-4 py-1.5 md:h-8 flex items-center justify-between overflow-x-auto no-scrollbar text-[10px] font-mono shrink-0">
     <div class="flex items-center gap-4 md:gap-6 whitespace-nowrap min-w-max">
       <span class="text-gray-500 font-bold uppercase tracking-wider" data-i18n="marketSessions">SESIONES:</span>
 
-      <!-- NUEVA YORK -->
       <div class="flex items-center gap-1.5">
         <span id="dot-ny" class="w-1.5 h-1.5 rounded-full bg-gray-500"></span>
         <span class="text-gray-300 font-bold">NEW YORK</span>
@@ -88,7 +84,6 @@
         <span id="badge-ny" class="px-1 py-0.2 rounded text-[9px] bg-gray-800 text-gray-400 font-bold">CLOSED</span>
       </div>
 
-      <!-- LONDRES -->
       <div class="flex items-center gap-1.5">
         <span id="dot-lon" class="w-1.5 h-1.5 rounded-full bg-gray-500"></span>
         <span class="text-gray-300 font-bold">LONDON</span>
@@ -97,7 +92,6 @@
         <span id="badge-lon" class="px-1 py-0.2 rounded text-[9px] bg-gray-800 text-gray-400 font-bold">CLOSED</span>
       </div>
 
-      <!-- TOKIO -->
       <div class="flex items-center gap-1.5">
         <span id="dot-tok" class="w-1.5 h-1.5 rounded-full bg-gray-500"></span>
         <span class="text-gray-300 font-bold">TOKYO</span>
@@ -106,7 +100,6 @@
         <span id="badge-tok" class="px-1 py-0.2 rounded text-[9px] bg-gray-800 text-gray-400 font-bold">CLOSED</span>
       </div>
 
-      <!-- SÍDNEY -->
       <div class="flex items-center gap-1.5">
         <span id="dot-syd" class="w-1.5 h-1.5 rounded-full bg-gray-500"></span>
         <span class="text-gray-300 font-bold">SYDNEY</span>
@@ -117,7 +110,7 @@
     </div>
   </div>
 
-  <!-- SELECTOR DE PESTAÑAS (TABS) EXCLUSIVO MOBILE -->
+  <!-- SELECTOR DE PESTAÑAS MOBILE -->
   <nav class="flex md:hidden bg-[#090d14] border-b border-white/10 text-xs shrink-0 font-medium">
     <button id="tabBtnOrderbook" onclick="switchMobileTab('orderbook')" class="flex-1 py-2 text-center text-[#00ff88] border-b-2 border-[#00ff88] bg-white/[0.02]" data-i18n="tabDepth">
       LIBRO L2
@@ -131,41 +124,39 @@
     </button>
   </nav>
 
-  <!-- BODY GRID (RESPONSIVE: TABS EN MOBILE / 3 COLS EN DESKTOP) -->
+  <!-- BODY GRID -->
   <main class="flex-1 p-1 md:p-1.5 overflow-y-auto md:overflow-hidden grid grid-cols-1 md:grid-cols-12 gap-1.5">
 
-    <!-- COLUMNA 1: ORDER BOOK EN VIVO -->
+    <!-- COLUMNA 1: ORDER BOOK L2 -->
     <section id="panelOrderbook" class="col-span-1 md:col-span-4 panel-box rounded flex flex-col h-[520px] md:h-full overflow-hidden">
       <div class="h-8 border-b border-white/10 px-3 flex items-center justify-between bg-white/[0.02] shrink-0">
         <span class="font-bold text-white text-[11px] tracking-wide" data-i18n="depthTitle">PROFUNDIDAD DE MERCADO (L2)</span>
         <span class="text-[10px] text-gray-400" data-i18n="sizeBtc">TAMAÑO (BTC)</span>
       </div>
 
-      <!-- ASKS (Venta) -->
       <div class="flex-1 flex flex-col justify-end p-2 border-b border-white/5 overflow-hidden">
         <div id="asksContainer" class="flex flex-col-reverse gap-0.5"></div>
       </div>
 
-      <!-- MID SPREAD BAR -->
       <div class="h-7 bg-white/[0.02] border-y border-white/10 px-3 flex items-center justify-between text-[11px] shrink-0">
         <span class="text-gray-400" data-i18n="lastMid">ÚLTIMO MID</span>
         <span id="midCenter" class="text-white font-bold tabular-nums">--</span>
       </div>
 
-      <!-- BIDS (Compra) -->
       <div class="flex-1 flex flex-col p-2 overflow-hidden">
         <div id="bidsContainer" class="flex flex-col gap-0.5"></div>
       </div>
     </section>
 
-    <!-- COLUMNA 2: DETECTOR DE SPOOFING -->
+    <!-- COLUMNA 2: DETECTOR DE SPOOFING (BOTÓN EN 1 LÍNEA GARANTIZADO) -->
     <section id="panelSpoof" class="hidden md:flex col-span-1 md:col-span-5 panel-box rounded flex-col h-[520px] md:h-full overflow-hidden">
-      <div class="h-8 border-b border-white/10 px-3 flex items-center justify-between bg-white/[0.02] shrink-0">
-        <div class="flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-[#ff3366] animate-pulse"></span>
-          <span class="font-bold text-white text-[11px] tracking-wide" data-i18n="spoofTitle">DETECCIÓN DE SPOOFING INSTITUCIONAL</span>
+      <div class="h-9 md:h-8 border-b border-white/10 px-2.5 md:px-3 flex items-center justify-between gap-2 bg-white/[0.02] shrink-0">
+        <div class="flex items-center gap-1.5 md:gap-2 min-w-0">
+          <span class="w-2 h-2 rounded-full bg-[#ff3366] animate-pulse shrink-0"></span>
+          <span class="font-bold text-white text-[10px] md:text-[11px] tracking-wide leading-tight" data-i18n="spoofTitle">DETECCIÓN DE SPOOFING INSTITUCIONAL</span>
         </div>
-        <span class="text-[10px] px-1.5 py-0.5 bg-[#ff3366]/20 text-[#ff3366] font-bold rounded" data-i18n="filterBtc">FILTRO &gt; 8 BTC</span>
+        <!-- Botón siempre en 1 sola línea -->
+        <span class="whitespace-nowrap shrink-0 text-[9px] md:text-[10px] px-2 py-0.5 bg-[#ff3366]/20 text-[#ff3366] font-bold rounded border border-[#ff3366]/30" data-i18n="filterBtc">FILTRO &gt; 8 BTC</span>
       </div>
 
       <div class="flex-1 overflow-y-auto p-2">
@@ -200,11 +191,11 @@
 
   </main>
 
-  <!-- FOOTER INSTITUCIONAL -->
+  <!-- FOOTER -->
   <footer class="border-t border-white/10 bg-[#06080c] px-3 md:px-4 py-1.5 md:h-7 flex flex-col sm:flex-row items-center justify-between gap-1 text-[10px] text-gray-400 font-mono shrink-0">
     <div class="flex items-center gap-2">
       <span class="w-1.5 h-1.5 rounded-full bg-[#00ff88]"></span>
-      <span>NEXUS RADAR v1.0.5</span>
+      <span>NEXUS RADAR v1.0.6</span>
       <span class="text-gray-600 hidden sm:inline">|</span>
       <span class="hidden sm:inline" data-i18n="footerTagline">Inteligencia Cuantitativa &amp; Microestructura L2</span>
     </div>
@@ -215,7 +206,7 @@
     </div>
   </footer>
 
-  <!-- MODAL DE AYUDA RÁPIDA -->
+  <!-- MODAL DE AYUDA -->
   <div id="helpModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
     <div class="panel-box max-w-lg w-full p-5 rounded-lg border border-white/20 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
       <div class="flex items-center justify-between border-b border-white/10 pb-2">
@@ -243,13 +234,10 @@
   </div>
 
   <script>
-    // ─────────────────────────────────────────────────────────────
-    // 1. MANEJO DE PESTAÑAS (TABS) EN MOBILE
-    // ─────────────────────────────────────────────────────────────
     let activeMobileTab = 'orderbook';
 
     function switchMobileTab(tab) {
-      if (window.innerWidth >= 768) return; // En desktop se muestran las 3 juntas
+      if (window.innerWidth >= 768) return;
       activeMobileTab = tab;
 
       const pOrderbook = document.getElementById('panelOrderbook');
@@ -260,17 +248,14 @@
       const bSpoof = document.getElementById('tabBtnSpoof');
       const bNews = document.getElementById('tabBtnNews');
 
-      // Ocultar todos
       pOrderbook.classList.add('hidden');
       pSpoof.classList.add('hidden');
       pNews.classList.add('hidden');
 
-      // Resetear estilos de tabs
       [bOrderbook, bSpoof, bNews].forEach(b => {
         b.className = 'flex-1 py-2 text-center text-gray-400 border-b-2 border-transparent hover:text-white relative';
       });
 
-      // Mostrar panel activo
       if (tab === 'orderbook') {
         pOrderbook.classList.remove('hidden');
         bOrderbook.className = 'flex-1 py-2 text-center text-[#00ff88] border-b-2 border-[#00ff88] bg-white/[0.02] font-bold';
@@ -284,7 +269,6 @@
       }
     }
 
-    // Autoajuste al redimensionar pantalla
     window.addEventListener('resize', () => {
       const pOrderbook = document.getElementById('panelOrderbook');
       const pSpoof = document.getElementById('panelSpoof');
@@ -299,9 +283,6 @@
       }
     });
 
-    // ─────────────────────────────────────────────────────────────
-    // 2. GESTIÓN DE HORARIOS Y SESIONES DE BOLSA
-    // ─────────────────────────────────────────────────────────────
     function getTzParts(date, tz) {
       try {
         const parts = new Intl.DateTimeFormat('en-US', {
@@ -347,7 +328,6 @@
     function actualizarHorariosMundiales() {
       try {
         const now = new Date();
-
         const localEl = document.getElementById('localClock');
         const utcEl = document.getElementById('utcClock');
         if (localEl) localEl.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
@@ -357,25 +337,21 @@
           utcEl.textContent = `${uH}:${uM} UTC`;
         }
 
-        // New York (NYSE: Lun-Vie 09:30 - 16:00 EDT)
         const ny = getTzParts(now, 'America/New_York');
         const nyIsWeekday = !['Sat', 'Sun'].includes(ny.day);
         const nyOpen = nyIsWeekday && ((ny.hour > 9 || (ny.hour === 9 && ny.min >= 30)) && ny.hour < 16);
         updateMarketBadge('ny', ny.timeStr, nyOpen);
 
-        // London (LSE: Lun-Vie 08:00 - 16:30 BST)
         const lon = getTzParts(now, 'Europe/London');
         const lonIsWeekday = !['Sat', 'Sun'].includes(lon.day);
         const lonOpen = lonIsWeekday && (lon.hour >= 8 && (lon.hour < 16 || (lon.hour === 16 && lon.min <= 30)));
         updateMarketBadge('lon', lon.timeStr, lonOpen);
 
-        // Tokyo (TSE: Lun-Vie 09:00 - 15:00 JST)
         const tok = getTzParts(now, 'Asia/Tokyo');
         const tokIsWeekday = !['Sat', 'Sun'].includes(tok.day);
         const tokOpen = tokIsWeekday && (tok.hour >= 9 && tok.hour < 15);
         updateMarketBadge('tok', tok.timeStr, tokOpen);
 
-        // Sydney (ASX: Lun-Vie 10:00 - 16:00 AEST)
         const syd = getTzParts(now, 'Australia/Sydney');
         const sydIsWeekday = !['Sat', 'Sun'].includes(syd.day);
         const sydOpen = sydIsWeekday && (syd.hour >= 10 && syd.hour < 16);
@@ -393,9 +369,6 @@
       if (m) m.classList.toggle('hidden');
     }
 
-    // ─────────────────────────────────────────────────────────────
-    // 3. DICCIONARIOS DE IDIOMA (i18n)
-    // ─────────────────────────────────────────────────────────────
     const I18N = {
       es: {
         indexPrice: 'PRECIO ÍNDICE:',
@@ -495,9 +468,6 @@
 
     setLanguage(currentLang);
 
-    // ─────────────────────────────────────────────────────────────
-    // 4. CONEXIÓN WEBSOCKET RESILIENTE
-    // ─────────────────────────────────────────────────────────────
     const midPriceEl = document.getElementById('midPrice');
     const midCenterEl = document.getElementById('midCenter');
     const spreadBadge = document.getElementById('spreadBadge');
@@ -506,6 +476,48 @@
     const alertsBody = document.getElementById('alertsBody');
     const noAlerts = document.getElementById('noAlerts');
     const newsContainer = document.getElementById('newsContainer');
+
+    function appendNewsCard(item) {
+      if (!newsContainer) return;
+      const clientLocalTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+      const card = document.createElement('div');
+      card.className = 'p-2 rounded bg-white/[0.02] border border-white/5 flex flex-col gap-1';
+      card.innerHTML = `
+        <div class="flex items-center justify-between text-[10px]">
+          <span class="px-1.5 py-0.2 rounded bg-[#00f2fe]/10 text-[#00f2fe] font-bold">${item.source}</span>
+          <span class="text-gray-400 font-mono">${clientLocalTime}</span>
+        </div>
+        <p class="text-white text-[11px] leading-snug font-medium">${item.title}</p>
+      `;
+      newsContainer.prepend(card);
+      if (newsContainer.children.length > 25) newsContainer.lastChild.remove();
+    }
+
+    function appendAlertRow(a) {
+      if (!alertsBody) return;
+      if (noAlerts) noAlerts.style.display = 'none';
+      const color = a.side === 'bid' ? 'text-[#00ff88]' : 'text-[#ff3366]';
+      const clientLocalTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+      const translatedType = a.side === 'bid' ? I18N[currentLang].spoofBid : I18N[currentLang].spoofAsk;
+      const translatedLevel = a.severidad === 'CRÍTICO' ? I18N[currentLang].criticalLevel : I18N[currentLang].highLevel;
+
+      if (window.innerWidth < 768 && activeMobileTab !== 'spoof') {
+        const bBadge = document.getElementById('mobileSpoofBadge');
+        if (bBadge) bBadge.classList.remove('hidden');
+      }
+
+      const row = document.createElement('tr');
+      row.className = 'hover:bg-white/[0.02] text-[10px] md:text-[11px]';
+      row.innerHTML = `
+        <td class="py-1.5 text-gray-400">${clientLocalTime}</td>
+        <td class="font-bold ${color}">${translatedType}</td>
+        <td class="text-white">${a.price}</td>
+        <td class="font-bold text-white">${a.volumenBTC} <span class="text-[9px] text-gray-500 font-normal">(${a.volumenUSD})</span></td>
+        <td class="text-gray-300">${a.duracionSeg}s</td>
+        <td><span class="px-1.5 py-0.2 rounded text-[9px] font-bold ${a.severidad === 'CRÍTICO' ? 'bg-[#ff3366]/20 text-[#ff3366]' : 'bg-yellow-500/20 text-yellow-400'}">${translatedLevel}</span></td>
+      `;
+      alertsBody.prepend(row);
+    }
 
     function connectWS() {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
@@ -516,10 +528,21 @@
         try {
           const data = JSON.parse(event.data);
 
+          if (data.type === 'INIT_NEWS' && data.items) {
+            data.items.slice().reverse().forEach(item => appendNewsCard(item));
+          }
+
+          if (data.type === 'INIT_ALERTS' && data.items) {
+            data.items.slice().reverse().forEach(alerta => appendAlertRow(alerta));
+          }
+
           if (data.type === 'ORDER_BOOK_UPDATE') {
             if (midPriceEl) midPriceEl.textContent = `$ ${data.midPrice}`;
             if (midCenterEl) midCenterEl.textContent = `$ ${data.midPrice}`;
             if (spreadBadge) spreadBadge.textContent = `${I18N[currentLang].spreadLabel} $ ${data.spread}`;
+
+            // En mobile, optimizar DOM si no está en la pestaña L2
+            if (window.innerWidth < 768 && activeMobileTab !== 'orderbook') return;
 
             // Asks (Venta)
             if (asksContainer && data.asks) {
@@ -557,58 +580,18 @@
           }
 
           if (data.type === 'ALERT_SPOOF') {
-            if (noAlerts) noAlerts.style.display = 'none';
-            const a = data.alerta;
-            const color = a.side === 'bid' ? 'text-[#00ff88]' : 'text-[#ff3366]';
-            const clientLocalTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-
-            const translatedType = a.side === 'bid' ? I18N[currentLang].spoofBid : I18N[currentLang].spoofAsk;
-            const translatedLevel = a.severidad === 'CRÍTICO' ? I18N[currentLang].criticalLevel : I18N[currentLang].highLevel;
-
-            // Alerta visual en tab mobile si no está seleccionada
-            if (activeMobileTab !== 'spoof') {
-              const bBadge = document.getElementById('mobileSpoofBadge');
-              if (bBadge) bBadge.classList.remove('hidden');
-            }
-
-            if (alertsBody) {
-              const row = document.createElement('tr');
-              row.className = 'hover:bg-white/[0.02] text-[10px] md:text-[11px]';
-              row.innerHTML = `
-                <td class="py-1.5 text-gray-400">${clientLocalTime}</td>
-                <td class="font-bold ${color}">${translatedType}</td>
-                <td class="text-white">${a.price}</td>
-                <td class="font-bold text-white">${a.volumenBTC} <span class="text-[9px] text-gray-500 font-normal">(${a.volumenUSD})</span></td>
-                <td class="text-gray-300">${a.duracionSeg}s</td>
-                <td><span class="px-1.5 py-0.2 rounded text-[9px] font-bold ${a.severidad === 'CRÍTICO' ? 'bg-[#ff3366]/20 text-[#ff3366]' : 'bg-yellow-500/20 text-yellow-400'}">${translatedLevel}</span></td>
-              `;
-              alertsBody.prepend(row);
-            }
+            appendAlertRow(data.alerta);
           }
 
           if (data.type === 'NEWS_TAPE') {
-            const item = data.item;
-            const clientLocalTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-            if (newsContainer) {
-              const card = document.createElement('div');
-              card.className = 'p-2 rounded bg-white/[0.02] border border-white/5 flex flex-col gap-1';
-              card.innerHTML = `
-                <div class="flex items-center justify-between text-[10px]">
-                  <span class="px-1.5 py-0.2 rounded bg-[#00f2fe]/10 text-[#00f2fe] font-bold">${item.source}</span>
-                  <span class="text-gray-400 font-mono">${clientLocalTime}</span>
-                </div>
-                <p class="text-white text-[11px] leading-snug font-medium">${item.title}</p>
-              `;
-              newsContainer.prepend(card);
-              if (newsContainer.children.length > 20) newsContainer.lastChild.remove();
-            }
+            appendNewsCard(data.item);
           }
         } catch (err) {
           console.error('Error procesando WS:', err);
         }
       };
 
-      ws.onclose = () => { setTimeout(connectWS, 2000); };
+      ws.onclose = () => setTimeout(connectWS, 2000);
       ws.onerror = () => { try { ws.close(); } catch(e) {} };
     }
 
