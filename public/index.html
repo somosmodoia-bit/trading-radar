@@ -31,44 +31,91 @@
 </head>
 <body class="h-screen flex flex-col overflow-hidden text-[12px] select-none">
 
-  <!-- TOP BAR INSTITUCIONAL -->
-  <header class="h-12 border-b border-white/10 bg-[#090d14] flex items-center justify-between px-4">
+  <!-- TOP BAR 1: HEADER PRINCIPAL -->
+  <header class="h-11 border-b border-white/10 bg-[#090d14] flex items-center justify-between px-4">
     <div class="flex items-center gap-5">
       <div class="flex items-center gap-2">
         <span class="w-2.5 h-2.5 rounded-full bg-[#00ff88] shadow-[0_0_8px_#00ff88]"></span>
         <span class="font-bold text-white tracking-widest text-sm">MODO<span class="text-[#00ff88]">IA</span> <span class="text-xs text-[#00f2fe] font-normal">RADAR</span></span>
       </div>
 
-      <div class="flex items-center gap-2 px-3 py-1 bg-white/[0.03] border border-white/10 rounded">
+      <div class="flex items-center gap-2 px-2.5 py-0.5 bg-white/[0.03] border border-white/10 rounded">
         <span class="font-bold text-white">BTC/USDT</span>
-        <span class="text-[10px] text-gray-400">PERPETUAL</span>
+        <span class="text-[10px] text-gray-400">PERP</span>
         <span class="text-[10px] px-1 bg-[#00ff88]/20 text-[#00ff88] font-bold rounded">100ms</span>
       </div>
 
-      <div class="flex items-center gap-3">
-        <span class="text-gray-400" data-i18n="indexPrice">PRECIO ÍNDICE:</span>
-        <span id="midPrice" class="font-bold text-white text-base tabular-nums">$ --</span>
+      <div class="flex items-center gap-2.5">
+        <span class="text-gray-400 text-[11px]" data-i18n="indexPrice">PRECIO ÍNDICE:</span>
+        <span id="midPrice" class="font-bold text-white text-sm tabular-nums">$ --</span>
         <span id="spreadBadge" class="text-[10px] px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[#00f2fe]">SPREAD: --</span>
       </div>
     </div>
 
+    <!-- HUSO HORARIO LOCAL DEL USUARIO & SELECTOR IDIOMA -->
     <div class="flex items-center gap-4 text-[11px]">
-      <div class="flex items-center gap-2">
-        <span class="w-2 h-2 rounded-full bg-[#00ff88] animate-ping"></span>
-        <span class="text-white font-medium" data-i18n="streamOnline">L2 STREAM ONLINE</span>
-      </div>
-      <div class="border-l border-white/10 pl-3 text-gray-400">
-        ALGO: <span class="text-[#00f2fe] font-bold">ANTI_SPOOF_v1</span>
+      <div class="flex items-center gap-1.5 text-gray-300">
+        <span class="text-gray-500">LOCAL:</span>
+        <span id="localClock" class="font-bold text-white tabular-nums">--:--:--</span>
+        <span class="text-gray-500 text-[10px]">(<span id="utcClock" class="text-[#00f2fe]">--:-- UTC</span>)</span>
       </div>
 
-      <!-- SELECTOR MANUAL DE IDIOMA -->
       <div class="border-l border-white/10 pl-3 flex items-center gap-1 font-bold">
         <button id="btnLangES" onclick="setLanguage('es')" class="px-1.5 py-0.5 rounded bg-[#00ff88]/20 text-[#00ff88]">ES</button>
         <span class="text-gray-600">/</span>
         <button id="btnLangEN" onclick="setLanguage('en')" class="px-1.5 py-0.5 rounded hover:bg-white/5 text-gray-400">EN</button>
       </div>
+
+      <button onclick="toggleHelpModal()" class="px-2 py-0.5 rounded bg-white/5 hover:bg-white/10 border border-white/10 text-white font-bold" title="Guía rápida">?</button>
     </div>
   </header>
+
+  <!-- TOP BAR 2: MONITOR DE BOLSAS DEL MUNDO CON HORARIOS DE OPERACIÓN -->
+  <div class="h-8 border-b border-white/10 bg-[#06080c] flex items-center justify-between px-4 text-[10px] font-mono">
+    <div class="flex items-center gap-6">
+      <span class="text-gray-500 font-bold uppercase tracking-wider" data-i18n="marketSessions">SESIONES:</span>
+
+      <!-- NUEVA YORK -->
+      <div class="flex items-center gap-1.5">
+        <span id="dot-ny" class="w-1.5 h-1.5 rounded-full bg-gray-500"></span>
+        <span class="text-gray-300 font-bold">NEW YORK</span>
+        <span id="time-ny" class="text-gray-400 tabular-nums">--:--</span>
+        <span class="text-gray-600 text-[9px]">(09:30-16:00)</span>
+        <span id="badge-ny" class="px-1 py-0.2 rounded text-[9px] bg-gray-800 text-gray-400 font-bold">CLOSED</span>
+      </div>
+
+      <!-- LONDRES -->
+      <div class="flex items-center gap-1.5">
+        <span id="dot-lon" class="w-1.5 h-1.5 rounded-full bg-gray-500"></span>
+        <span class="text-gray-300 font-bold">LONDON</span>
+        <span id="time-lon" class="text-gray-400 tabular-nums">--:--</span>
+        <span class="text-gray-600 text-[9px]">(08:00-16:30)</span>
+        <span id="badge-lon" class="px-1 py-0.2 rounded text-[9px] bg-gray-800 text-gray-400 font-bold">CLOSED</span>
+      </div>
+
+      <!-- TOKIO -->
+      <div class="flex items-center gap-1.5">
+        <span id="dot-tok" class="w-1.5 h-1.5 rounded-full bg-gray-500"></span>
+        <span class="text-gray-300 font-bold">TOKYO</span>
+        <span id="time-tok" class="text-gray-400 tabular-nums">--:--</span>
+        <span class="text-gray-600 text-[9px]">(09:00-15:00)</span>
+        <span id="badge-tok" class="px-1 py-0.2 rounded text-[9px] bg-gray-800 text-gray-400 font-bold">CLOSED</span>
+      </div>
+
+      <!-- SÍDNEY -->
+      <div class="flex items-center gap-1.5">
+        <span id="dot-syd" class="w-1.5 h-1.5 rounded-full bg-gray-500"></span>
+        <span class="text-gray-300 font-bold">SYDNEY</span>
+        <span id="time-syd" class="text-gray-400 tabular-nums">--:--</span>
+        <span class="text-gray-600 text-[9px]">(10:00-16:00)</span>
+        <span id="badge-syd" class="px-1 py-0.2 rounded text-[9px] bg-gray-800 text-gray-400 font-bold">CLOSED</span>
+      </div>
+    </div>
+
+    <div class="text-gray-400">
+      FEED: <span class="text-[#00ff88]">BINANCE FUTURES L2</span>
+    </div>
+  </div>
 
   <!-- BODY GRID (3 PANELES) -->
   <main class="flex-1 grid grid-cols-12 gap-1.5 p-1.5 overflow-hidden">
@@ -111,7 +158,7 @@
         <table class="w-full text-left">
           <thead>
             <tr class="text-[10px] text-gray-500 border-b border-white/10 pb-1">
-              <th class="py-1" data-i18n="thTime">HORA</th>
+              <th class="py-1" data-i18n="thTime">HORA (LOCAL)</th>
               <th data-i18n="thType">TIPO</th>
               <th data-i18n="thPrice">PRECIO</th>
               <th data-i18n="thVol">VOL BTC</th>
@@ -119,9 +166,7 @@
               <th data-i18n="thLevel">NIVEL</th>
             </tr>
           </thead>
-          <tbody id="alertsBody" class="divide-y divide-white/[0.04] tabular-nums">
-            <!-- Inyectado por JS -->
-          </tbody>
+          <tbody id="alertsBody" class="divide-y divide-white/[0.04] tabular-nums"></tbody>
         </table>
         <div id="noAlerts" class="h-40 flex items-center justify-center text-gray-500 text-xs" data-i18n="scanningText">
           Escaneando cancelaciones institucionales en microsegundos...
@@ -136,189 +181,51 @@
         <span class="text-[10px] text-[#00f2fe] font-bold">LIVE WIRE</span>
       </div>
 
-      <div id="newsContainer" class="flex-1 overflow-y-auto p-2.5 flex flex-col gap-2">
-        <!-- Inyectado por JS -->
-      </div>
+      <div id="newsContainer" class="flex-1 overflow-y-auto p-2.5 flex flex-col gap-2"></div>
     </section>
 
   </main>
 
+  <!-- MODAL DE AYUDA RÁPIDA -->
+  <div id="helpModal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="panel-box max-w-lg w-full p-5 rounded-lg border border-white/20 shadow-2xl space-y-4">
+      <div class="flex items-center justify-between border-b border-white/10 pb-2">
+        <h3 class="text-white font-bold text-sm tracking-wide">GUÍA RÁPIDA // CÓMO INTERPRETAR LA TERMINAL</h3>
+        <button onclick="toggleHelpModal()" class="text-gray-400 hover:text-white font-bold">✕</button>
+      </div>
+      
+      <div class="space-y-3 text-[11px] text-gray-300">
+        <div>
+          <span class="text-[#00ff88] font-bold">1. Profundidad de Mercado (Columna Izquierda):</span>
+          <p class="text-gray-400 mt-0.5">Órdenes vivas esperando en Binance Futures: verde para compras y rojo para ventas. Las barras representan volumen acumulado en cada nivel.</p>
+        </div>
+        <div>
+          <span class="text-[#ff3366] font-bold">2. Radar de Spoofing (Columna Centro):</span>
+          <p class="text-gray-400 mt-0.5">Detecta ballenas o algoritmos que colocan órdenes de más de 8 BTC y las cancelan antes de 4.5 segundos para engañar al mercado.</p>
+        </div>
+        <div>
+          <span class="text-[#00f2fe] font-bold">3. Sesiones Bursátiles (Barra Superior):</span>
+          <p class="text-gray-400 mt-0.5">Muestra los horarios de Nueva York, Londres, Tokio y Sídney. Si figura en verde (OPEN) el mercado tradicional está abierto y suele inyectar la mayor liquidez y volatilidad.</p>
+        </div>
+      </div>
+
+      <button onclick="toggleHelpModal()" class="w-full py-1.5 rounded bg-[#00ff88]/20 text-[#00ff88] border border-[#00ff88]/40 font-bold hover:bg-[#00ff88]/30">CERRAR</button>
+    </div>
+  </div>
+
   <script>
     // ─────────────────────────────────────────────────────────────
-    // DICCIONARIOS DE INTERNACIONALIZACIÓN (i18n)
+    // 1. GESTIÓN DE HORARIOS MUNDIALES Y SESIONES DE BOLSA
     // ─────────────────────────────────────────────────────────────
-    const I18N = {
-      es: {
-        indexPrice: 'PRECIO ÍNDICE:',
-        streamOnline: 'L2 STREAM ONLINE',
-        depthTitle: 'PROFUNDIDAD DE MERCADO (L2)',
-        sizeBtc: 'TAMAÑO (BTC)',
-        lastMid: 'ÚLTIMO MID',
-        spoofTitle: 'DETECCIÓN DE SPOOFING INSTITUCIONAL',
-        filterBtc: 'FILTRO > 8 BTC',
-        thTime: 'HORA',
-        thType: 'TIPO',
-        thPrice: 'PRECIO',
-        thVol: 'VOL BTC',
-        thDuration: 'DURACIÓN',
-        thLevel: 'NIVEL',
-        scanningText: 'Escaneando cancelaciones institucionales en microsegundos...',
-        newsTitle: 'NOTICIAS DE IMPACTO RÁPIDO',
-        spreadLabel: 'SPREAD:',
-        criticalLevel: 'CRÍTICO',
-        highLevel: 'ALTO',
-        spoofBid: 'SPOOFING COMPRA (Fake Wall)',
-        spoofAsk: 'SPOOFING VENTA (Fake Wall)'
-      },
-      en: {
-        indexPrice: 'INDEX PRICE:',
-        streamOnline: 'L2 STREAM ONLINE',
-        depthTitle: 'MARKET DEPTH (L2)',
-        sizeBtc: 'SIZE (BTC)',
-        lastMid: 'LAST MID',
-        spoofTitle: 'INSTITUTIONAL SPOOFING RADAR',
-        filterBtc: 'FILTER > 8 BTC',
-        thTime: 'TIME',
-        thType: 'TYPE',
-        thPrice: 'PRICE',
-        thVol: 'VOL BTC',
-        thDuration: 'DURATION',
-        thLevel: 'LEVEL',
-        scanningText: 'Scanning institutional cancellations at microsecond speed...',
-        newsTitle: 'BREAKING IMPACT NEWS',
-        spreadLabel: 'SPREAD:',
-        criticalLevel: 'CRITICAL',
-        highLevel: 'HIGH',
-        spoofBid: 'BID SPOOFING (Fake Wall)',
-        spoofAsk: 'ASK SPOOFING (Fake Wall)'
-      }
-    };
+    function actualizarHorariosMundiales() {
+      const now = new Date();
 
-    // Detección automática por idioma de navegador/dispositivo
-    let userLocale = (navigator.languages && navigator.languages[0]) || navigator.language || 'en';
-    let currentLang = userLocale.toLowerCase().startsWith('es') ? 'es' : 'en';
+      // Reloj local y UTC
+      const localStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+      const utcHours = String(now.getUTCHours()).padStart(2, '0');
+      const utcMins = String(now.getUTCMinutes()).padStart(2, '0');
+      document.getElementById('localClock').textContent = localStr;
+      document.getElementById('utcClock').textContent = `${utcHours}:${utcMins} UTC`;
 
-    function setLanguage(lang) {
-      currentLang = lang;
-      const dict = I18N[lang];
-
-      // Reemplazo de textos de interfaz
-      document.querySelectorAll('[data-i18n]').forEach((el) => {
-        const key = el.getAttribute('data-i18n');
-        if (dict[key]) el.textContent = dict[key];
-      });
-
-      // Actualización de botones de lenguaje
-      const btnES = document.getElementById('btnLangES');
-      const btnEN = document.getElementById('btnLangEN');
-      if (lang === 'es') {
-        btnES.className = 'px-1.5 py-0.5 rounded bg-[#00ff88]/20 text-[#00ff88]';
-        btnEN.className = 'px-1.5 py-0.5 rounded hover:bg-white/5 text-gray-400';
-      } else {
-        btnEN.className = 'px-1.5 py-0.5 rounded bg-[#00f2fe]/20 text-[#00f2fe]';
-        btnES.className = 'px-1.5 py-0.5 rounded hover:bg-white/5 text-gray-400';
-      }
-    }
-
-    // Inicializar traducción
-    setLanguage(currentLang);
-
-    // ─────────────────────────────────────────────────────────────
-    // COMUNICACIÓN WEBSOCKET & RENDERIZADO
-    // ─────────────────────────────────────────────────────────────
-    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const ws = new WebSocket(`${protocol}//${window.location.host}`);
-
-    const midPriceEl = document.getElementById('midPrice');
-    const midCenterEl = document.getElementById('midCenter');
-    const spreadBadge = document.getElementById('spreadBadge');
-    const asksContainer = document.getElementById('asksContainer');
-    const bidsContainer = document.getElementById('bidsContainer');
-    const alertsBody = document.getElementById('alertsBody');
-    const noAlerts = document.getElementById('noAlerts');
-    const newsContainer = document.getElementById('newsContainer');
-
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-
-      if (data.type === 'ORDER_BOOK_UPDATE') {
-        midPriceEl.textContent = `$ ${data.midPrice}`;
-        midCenterEl.textContent = `$ ${data.midPrice}`;
-        spreadBadge.textContent = `${I18N[currentLang].spreadLabel} $ ${data.spread}`;
-
-        // Render Asks
-        let asksHTML = '';
-        const maxAskQty = Math.max(...data.asks.map(a => a[1]), 1);
-        data.asks.forEach(([price, qty]) => {
-          const pct = Math.min((qty / maxAskQty) * 100, 100).toFixed(0);
-          asksHTML += `
-            <div class="relative flex items-center justify-between px-2 py-0.5 rounded text-[11px] overflow-hidden">
-              <div class="absolute right-0 top-0 bottom-0 ask-gradient" style="width: ${pct}%"></div>
-              <span class="text-[#ff3366] font-semibold z-10 tabular-nums">${price.toFixed(2)}</span>
-              <span class="text-white z-10 tabular-nums font-mono">${qty.toFixed(3)}</span>
-            </div>
-          `;
-        });
-        asksContainer.innerHTML = asksHTML;
-
-        // Render Bids
-        let bidsHTML = '';
-        const maxBidQty = Math.max(...data.bids.map(b => b[1]), 1);
-        data.bids.forEach(([price, qty]) => {
-          const pct = Math.min((qty / maxBidQty) * 100, 100).toFixed(0);
-          bidsHTML += `
-            <div class="relative flex items-center justify-between px-2 py-0.5 rounded text-[11px] overflow-hidden">
-              <div class="absolute right-0 top-0 bottom-0 bid-gradient" style="width: ${pct}%"></div>
-              <span class="text-[#00ff88] font-semibold z-10 tabular-nums">${price.toFixed(2)}</span>
-              <span class="text-white z-10 tabular-nums font-mono">${qty.toFixed(3)}</span>
-            </div>
-          `;
-        });
-        bidsContainer.innerHTML = bidsHTML;
-      }
-
-      if (data.type === 'ALERT_SPOOF') {
-        noAlerts.style.display = 'none';
-        const a = data.alerta;
-        const color = a.side === 'bid' ? 'text-[#00ff88]' : 'text-[#ff3366]';
-        
-        // Tipo traducido
-        const translatedType = a.side === 'bid' 
-          ? I18N[currentLang].spoofBid 
-          : I18N[currentLang].spoofAsk;
-
-        const translatedLevel = a.severidad === 'CRÍTICO' 
-          ? I18N[currentLang].criticalLevel 
-          : I18N[currentLang].highLevel;
-
-        const row = document.createElement('tr');
-        row.className = 'hover:bg-white/[0.02] text-[11px]';
-        row.innerHTML = `
-          <td class="py-1.5 text-gray-400">${a.timestamp}</td>
-          <td class="font-bold ${color}">${translatedType}</td>
-          <td class="text-white">${a.price}</td>
-          <td class="font-bold text-white">${a.volumenBTC} <span class="text-[9px] text-gray-500 font-normal">(${a.volumenUSD})</span></td>
-          <td class="text-gray-300">${a.duracionSeg}s</td>
-          <td><span class="px-1.5 py-0.2 rounded text-[9px] font-bold ${a.severidad === 'CRÍTICO' ? 'bg-[#ff3366]/20 text-[#ff3366]' : 'bg-yellow-500/20 text-yellow-400'}">${translatedLevel}</span></td>
-        `;
-        alertsBody.prepend(row);
-      }
-
-      if (data.type === 'NEWS_TAPE') {
-        const item = data.item;
-        const card = document.createElement('div');
-        card.className = 'p-2 rounded bg-white/[0.02] border border-white/5 flex flex-col gap-1';
-        card.innerHTML = `
-          <div class="flex items-center justify-between text-[10px]">
-            <span class="px-1.5 py-0.2 rounded bg-[#00f2fe]/10 text-[#00f2fe] font-bold">${item.source}</span>
-            <span class="text-gray-500">${item.time}</span>
-          </div>
-          <p class="text-white text-[11px] leading-snug font-medium">${item.title}</p>
-        `;
-        newsContainer.prepend(card);
-        if (newsContainer.children.length > 20) newsContainer.lastChild.remove();
-      }
-    };
-  </script>
-</body>
-</html>
+      // Auxiliares por zona horaria
+      const opcionesHora = (tz) => ({ timeZone: tz, hour
